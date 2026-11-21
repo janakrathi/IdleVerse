@@ -1,7 +1,7 @@
 {
   "name": "idleverse",
   "productName": "IdleVerse",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Step away from your desk and your screen becomes a dark, power-saving lyrics show for whatever is playing in Spotify or Apple Music.",
   "author": "janakrathi",
   "homepage": "https://github.com/janakrathi/idleverse",
@@ -21,6 +21,7 @@
   "build": {
     "appId": "com.janakrathi.idleverse",
     "productName": "IdleVerse",
+    "afterPack": "scripts/adhoc-sign.js",
     "files": ["src/**/*", "assets/icon.png"],
     "extraResources": [{ "from": "src/detectors/win-nowplaying.ps1", "to": "win-nowplaying.ps1" }],
     "publish": [{ "provider": "github", "owner": "janakrathi", "repo": "idleverse", "releaseType": "release" }],
@@ -39,7 +40,7 @@
       "icon": "assets/icon.png",
       "category": "public.app-category.music",
       "artifactName": "IdleVerse-${version}-mac-${arch}.${ext}",
-      "identity": "-",
+      "identity": null,
       "hardenedRuntime": false,
       "extendInfo": {
         "NSAppleEventsUsageDescription": "IdleVerse reads the current song from Spotify and Apple Music so it can show its lyrics.",
