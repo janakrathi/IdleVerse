@@ -1,0 +1,121 @@
+:root {
+  --h: 280;                                   /* song hue, set from JS */
+  --c1: hsl(var(--h) 95% 68%);
+  --c2: hsl(calc(var(--h) + 45) 95% 66%);
+  --c3: hsl(calc(var(--h) + 190) 90% 66%);
+  --display: "Segoe UI Variable Display", "SF Pro Display", "Segoe UI", system-ui, sans-serif;
+  --mono: "Cascadia Mono", "SF Mono", Menlo, Consolas, monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: #000;            /* true black: OLED pixels switch off, LCDs dim */
+  color: #fff; cursor: none; user-select: none;
+  font-family: var(--display);
+}
+body { transition: opacity 1.2s ease, filter 1.2s ease; }
+body.paused { opacity: .35; filter: saturate(.3); }
+
+/* ---- dim drifting colour blobs ---- */
+#blobs { position: fixed; inset: 0; filter: blur(90px); opacity: .16; pointer-events: none; }
+#blobs i { position: absolute; width: 45vmax; height: 45vmax; border-radius: 50%; }
+#blobs i:nth-child(1) { background: var(--c1); left: -10vmax; top: -10vmax; animation: drift1 38s ease-in-out infinite alternate; }
+#blobs i:nth-child(2) { background: var(--c2); right: -15vmax; top: 20vh; animation: drift2 46s ease-in-out infinite alternate; }
+#blobs i:nth-child(3) { background: var(--c3); left: 25vw; bottom: -20vmax; animation: drift3 52s ease-in-out infinite alternate; }
+@keyframes drift1 { to { transform: translate(30vw, 25vh) scale(1.2); } }
+@keyframes drift2 { to { transform: translate(-35vw, -10vh) scale(.8); } }
+@keyframes drift3 { to { transform: translate(-20vw, -30vh) scale(1.1); } }
+
+/* ---- stage ---- */
+#stage {
+  position: fixed; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 4vh; padding: 0 7vw;
+  text-align: center; transition: transform 8s ease-in-out;   /* slow drift = no burn-in */
+}
+.side {
+  font-size: clamp(16px, 2.1vw, 34px); font-weight: 600; color: #fff;
+  opacity: .22; max-width: 70vw; min-height: 1.3em; transition: opacity .5s;
+}
+#current {
+  font-size: clamp(36px, 6vw, 112px); font-weight: 800; line-height: 1.12;
+  letter-spacing: -0.02em; max-width: 86vw; min-height: 2.4em;
+  display: flex; align-items: center; justify-content: center;
+}
+.line { display: block; }
+.line.leaving { animation: leave .45s ease forwards; position: absolute; }
+@keyframes leave { to { opacity: 0; transform: translateY(-40px) scale(.92); filter: blur(6px); } }
+
+.w { display: inline-block; margin: 0 .14em; white-space: nowrap; }
+.c { display: inline-block; }
+
+/* ---- style: bounce ---- */
+.bounce .w { opacity: 0; transform: translateY(-.8em) scale(.5); }
+.bounce .w.on { animation: bounceIn .7s cubic-bezier(.34, 1.8, .5, 1) forwards; }
+.bounce .w.active { color: var(--c1); }
+@keyframes bounceIn { to { opacity: 1; transform: none; } }
+
+/* ---- style: neon ---- */
+.neon { font-style: italic; }
+.neon .w { color: transparent; -webkit-text-stroke: 1.5px hsl(var(--h) 60% 40% / .5); }
+.neon .w.on { animation: flicker .9s steps(1) forwards; }
+@keyframes flicker {
+  0%, 18%, 32% { color: #fff; -webkit-text-stroke: 0; text-shadow: 0 0 .1em #fff, 0 0 .4em var(--c1), 0 0 1em var(--c1), 0 0 2em var(--c2); }
+  12%, 26% { color: transparent; text-shadow: none; }
+  100% { color: #fff; -webkit-text-stroke: 0; text-shadow: 0 0 .08em #fff, 0 0 .35em var(--c1), 0 0 .9em var(--c1), 0 0 1.8em var(--c2); }
+}
+
+/* ---- style: wave ---- */
+.wave .w { opacity: .2; transition: opacity .3s, color .3s; }
+.wave .w.on { opacity: 1; }
+.wave .w.active { color: var(--c2); }
+.wave .c { animation: wave 1.6s ease-in-out infinite; animation-delay: calc(var(--i) * -90ms); }
+@keyframes wave { 50% { transform: translateY(-.18em); } }
+
+/* ---- style: typewriter ---- */
+.typewriter { font-family: var(--mono); font-weight: 700; letter-spacing: 0; font-size: .82em; }
+.typewriter .c { opacity: 0; }
+.typewriter .w.on .c { animation: type 0s forwards; animation-delay: calc(var(--j) * 45ms); }
+.typewriter .w.active::after {
+  content: ""; display: inline-block; width: .5em; height: .1em; margin-left: .08em;
+  background: var(--c3); animation: blink 1s steps(1) infinite; vertical-align: baseline;
+}
+@keyframes type { to { opacity: 1; } }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ---- style: pop ---- */
+.pop .w { opacity: 0; transform: scale(0) rotate(var(--r)); }
+.pop .w.on { animation: popIn .55s cubic-bezier(.2, 2, .4, 1) forwards; }
+.pop .w:nth-child(3n+1).on { color: var(--c1); }
+.pop .w:nth-child(3n+2).on { color: var(--c2); }
+.pop .w:nth-child(3n).on { color: var(--c3); }
+@keyframes popIn { 60% { opacity: 1; transform: scale(1.2) rotate(calc(var(--r) * -.5)); } to { opacity: 1; transform: rotate(calc(var(--r) * .25)); } }
+
+/* ---- breaks, intro, empty states ---- */
+.rest { display: flex; gap: .6em; font-size: .9em; color: var(--c1); }
+.rest span { animation: hop 1.2s ease-in-out infinite; }
+.rest span:nth-child(2) { animation-delay: .2s; color: var(--c2); }
+.rest span:nth-child(3) { animation-delay: .4s; color: var(--c3); }
+@keyframes hop { 50% { transform: translateY(-.4em) rotate(-12deg); } }
+
+.intro { animation: introIn 1.4s cubic-bezier(.2, .9, .3, 1) both; }
+.intro small { display: block; font-size: .38em; font-weight: 600; opacity: .55; margin-top: .4em; letter-spacing: .02em; }
+.intro b { background: linear-gradient(90deg, var(--c1), var(--c2), var(--c3)); -webkit-background-clip: text; background-clip: text; color: transparent; }
+@keyframes introIn { from { opacity: 0; transform: scale(.85); filter: blur(12px); } }
+
+.note { font-size: .45em; font-weight: 600; opacity: .55; display: block; margin-top: .6em; }
+.pulse { animation: pulse 1.6s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+
+/* ---- footer ---- */
+#info { position: fixed; left: 4vw; right: 4vw; bottom: 4vh; opacity: .3; font-size: 14px; }
+#song { margin-bottom: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#bar { height: 2px; background: rgba(255, 255, 255, .15); border-radius: 2px; overflow: hidden; }
+#bar span { display: block; height: 100%; width: 0; background: var(--c1); transition: width .3s linear; }
+
+#toast {
+  position: fixed; top: 5vh; left: 50%; transform: translateX(-50%);
+  padding: 10px 18px; border-radius: 999px; background: rgba(255, 255, 255, .1);
+  font-size: 15px; opacity: 0; transition: opacity .3s;
+}
+#toast.show { opacity: .8; }

@@ -1,0 +1,50 @@
+{
+  "name": "idleverse",
+  "productName": "IdleVerse",
+  "version": "1.0.0",
+  "description": "Step away from your desk and your screen becomes a dark, power-saving lyrics show for whatever is playing in Spotify or Apple Music.",
+  "author": "janakrathi",
+  "homepage": "https://github.com/janakrathi/idleverse",
+  "repository": { "type": "git", "url": "https://github.com/janakrathi/idleverse.git" },
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "demo": "electron . --demo",
+    "dist:win": "electron-builder --win",
+    "dist:mac": "electron-builder --mac"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
+  },
+  "build": {
+    "appId": "com.janakrathi.idleverse",
+    "productName": "IdleVerse",
+    "files": ["src/**/*", "assets/icon.png"],
+    "extraResources": [{ "from": "src/detectors/win-nowplaying.ps1", "to": "win-nowplaying.ps1" }],
+    "publish": [{ "provider": "github", "owner": "janakrathi", "repo": "idleverse", "releaseType": "release" }],
+    "win": {
+      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "icon": "assets/icon.png",
+      "artifactName": "IdleVerse-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "runAfterFinish": true
+    },
+    "mac": {
+      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],
+      "icon": "assets/icon.png",
+      "category": "public.app-category.music",
+      "artifactName": "IdleVerse-${version}-mac-${arch}.${ext}",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "extendInfo": {
+        "NSAppleEventsUsageDescription": "IdleVerse reads the current song from Spotify and Apple Music so it can show its lyrics.",
+        "LSUIElement": true
+      }
+    }
+  }
+}

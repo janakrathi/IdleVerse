@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" width="1200" height="420" role="img" aria-label="IdleVerse - your screen becomes a lyric show">
+  <defs>
+    <linearGradient id="title" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#c77dff"/>
+      <stop offset="0.5" stop-color="#ff5fb8"/>
+      <stop offset="1" stop-color="#6cf5a2"/>
+    </linearGradient>
+    <radialGradient id="g1"><stop offset="0" stop-color="#7b2cbf"/><stop offset="1" stop-color="#7b2cbf" stop-opacity="0"/></radialGradient>
+    <radialGradient id="g2"><stop offset="0" stop-color="#c9184a"/><stop offset="1" stop-color="#c9184a" stop-opacity="0"/></radialGradient>
+    <radialGradient id="g3"><stop offset="0" stop-color="#2d6a4f"/><stop offset="1" stop-color="#2d6a4f" stop-opacity="0"/></radialGradient>
+    <filter id="glow" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur stdDeviation="8" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="round"><rect width="1200" height="420" rx="28"/></clipPath>
+    <style>
+      .blob { opacity: .55; }
+      .b1 { animation: d1 14s ease-in-out infinite alternate; }
+      .b2 { animation: d2 18s ease-in-out infinite alternate; }
+      .b3 { animation: d3 16s ease-in-out infinite alternate; }
+      @keyframes d1 { to { transform: translate(260px, 60px); } }
+      @keyframes d2 { to { transform: translate(-300px, -40px); } }
+      @keyframes d3 { to { transform: translate(-120px, -90px); } }
+      .title { font: 800 120px "Segoe UI", "SF Pro Display", -apple-system, Helvetica, Arial, sans-serif; letter-spacing: -4px; }
+      .w { font: 700 30px "Segoe UI", "SF Pro Display", -apple-system, Helvetica, Arial, sans-serif; fill: #fff; opacity: 0;
+           animation: pop 6s cubic-bezier(.2, 1.8, .4, 1) infinite; transform-box: fill-box; transform-origin: center; }
+      .w2 { animation-delay: .35s; } .w3 { animation-delay: .7s; fill: #ff5fb8; } .w4 { animation-delay: 1.05s; }
+      .w5 { animation-delay: 1.4s; } .w6 { animation-delay: 1.75s; fill: #6cf5a2; }
+      @keyframes pop {
+        0% { opacity: 0; transform: translateY(14px) scale(.4); }
+        8% { opacity: 1; transform: none; }
+        80% { opacity: 1; transform: none; }
+        92%, 100% { opacity: 0; transform: translateY(-10px); }
+      }
+      .note { font: 700 34px sans-serif; fill: #c77dff; animation: hop 2.4s ease-in-out infinite; transform-box: fill-box; }
+      .n2 { animation-delay: .4s; fill: #ff5fb8; } .n3 { animation-delay: .8s; fill: #6cf5a2; }
+      @keyframes hop { 50% { transform: translateY(-12px) rotate(-10deg); } }
+      .sub { font: 500 17px "Segoe UI", -apple-system, Helvetica, Arial, sans-serif; fill: #ffffff; opacity: .45; letter-spacing: 3px; }
+    </style>
+  </defs>
+  <g clip-path="url(#round)">
+    <rect width="1200" height="420" fill="#000"/>
+    <g>
+      <circle class="blob b1" cx="180" cy="80" r="320" fill="url(#g1)"/>
+      <circle class="blob b2" cx="1040" cy="170" r="330" fill="url(#g2)"/>
+      <circle class="blob b3" cx="560" cy="430" r="330" fill="url(#g3)"/>
+    </g>
+    <text class="note" x="250" y="110">♪</text>
+    <text class="note n2" x="925" y="95">♫</text>
+    <text class="note n3" x="985" y="330">♪</text>
+    <text class="title" x="600" y="215" text-anchor="middle" fill="url(#title)" filter="url(#glow)">IdleVerse</text>
+    <g text-anchor="middle">
+      <text class="w"  x="386" y="285">step</text>
+      <text class="w w2" x="468" y="285">away</text>
+      <text class="w w3" x="546" y="285">and</text>
+      <text class="w w4" x="612" y="285">the</text>
+      <text class="w w5" x="693" y="285">lyrics</text>
+      <text class="w w6" x="800" y="285">appear</text>
+    </g>
+    <text class="sub" x="600" y="360" text-anchor="middle">SPOTIFY · APPLE MUSIC · WINDOWS · MACOS</text>
+  </g>
+</svg>
