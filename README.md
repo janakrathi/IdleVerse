@@ -5,8 +5,8 @@
 <br>
 
 **Step away from your desk and your screen becomes a lyric show.**<br>
-IdleVerse detects whatever's playing in Spotify or Apple Music, turns your display pitch-black
-to save power, and shows the lyrics live, synced to the beat and animated word by word.
+IdleVerse detects whatever's playing in Spotify or Apple Music, reads the song's vibe and album colours,
+turns your display dark to save power, and shows the lyrics live, synced and animated word by word.
 
 <br>
 
@@ -15,7 +15,7 @@ to save power, and shows the lyrics live, synced to the beat and animated word b
 [![macOS](https://img.shields.io/badge/macOS-Intel%20%26%20Apple%20Silicon-6cf5a2?style=for-the-badge&logo=apple&logoColor=white&labelColor=0d0d0d)](#-install)
 [![License](https://img.shields.io/badge/license-MIT-ffffff?style=for-the-badge&labelColor=0d0d0d)](LICENSE)
 
-[**Install**](#-install) · [**Features**](#-features) · [**Styles**](#-five-moods) · [**Controls**](#-controls) · [**How it works**](#-how-it-works) · [**FAQ**](#-faq)
+[**Install**](#-install) · [**Features**](#-features) · [**Vibes**](#-six-vibes) · [**Controls**](#-controls) · [**How it works**](#-how-it-works) · [**FAQ**](#-faq)
 
 <br>
 
@@ -40,29 +40,43 @@ Spotify and Apple Music on Windows and Mac. No logins, no API keys, no setup. It
 <td width="50%" valign="top">
 
 **⏱️ &nbsp;Synced to the beat**<br>
-Lyrics are time-synced, and each word appears as it's sung. If the timing is a little off, tap <kbd>←</kbd> <kbd>→</kbd> to nudge it.
+Lyrics are time-synced, and each word appears as it's sung. If the timing is a little off, tap <kbd>[</kbd> <kbd>]</kbd> to nudge it.
 
 </td>
 </tr>
 <tr>
 <td valign="top">
 
-**🌑 &nbsp;Power-saver black**<br>
-A true-black background means OLED pixels switch off and LCDs dim. Pause the music and it steps aside so your screen can sleep.
+**🎭 &nbsp;Reads the song's vibe**<br>
+Sad ballad, rock anthem, hip-hop banger, dance track? IdleVerse works it out from the genre, the lyrics and how fast the words come, then picks a design to match.
 
 </td>
 <td valign="top">
 
-**💤 &nbsp;Starts when you leave**<br>
-Walk away for a minute (you choose how long) and the lyric show begins. Move the mouse and you're back where you left off.
+**🖼️ &nbsp;Album-art colours**<br>
+It pulls the album cover and builds the whole colour theme from it, so every song looks like its own artwork.
 
 </td>
 </tr>
 <tr>
 <td valign="top">
 
-**🎨 &nbsp;Five animation moods**<br>
-Bounce, Neon, Wave, Typewriter and Pop, or *Mix* them line by line. Every song gets its own colour palette.
+**⏯️ &nbsp;Playback controls**<br>
+Move the mouse and a control bar slides in: previous, play / pause, next. It works with Spotify and Apple Music.
+
+</td>
+<td valign="top">
+
+**🌍 &nbsp;Any language**<br>
+English, Hindi, Punjabi, Spanish, Korean and more. Words are animated whole, so every script renders properly.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+**🌑 &nbsp;Power-saver dark**<br>
+Near-black backgrounds mean OLED pixels stay mostly off. Pause the music and it steps aside so your screen can sleep.
 
 </td>
 <td valign="top">
@@ -76,21 +90,39 @@ The text drifts a few pixels every 30 seconds, so nothing stays in one place lon
 
 <br>
 
-## ✦ Five moods
+## ✦ Six vibes
+
+Every song gets the design that fits it, and the backlight, glow and accents are all taken from its own album cover. The vibe is worked out quietly in the background; nothing is labelled on screen. To choose a design yourself, use the tray menu or press <kbd>V</kbd>.
+
+<sub>Shown with the built-in demo song and six sample covers, so you can see the colours follow the artwork.</sub>
 
 <table>
 <tr>
-<td width="50%"><img src="assets/readme/style-bounce.jpg" alt="Bounce style"><p align="center"><b>Bounce</b> · words drop in with a spring</p></td>
-<td width="50%"><img src="assets/readme/style-neon.jpg" alt="Neon style"><p align="center"><b>Neon</b> · flickers on like a sign</p></td>
+<td width="50%"><img src="assets/readme/vibe-sad.jpg" alt="Sad vibe"><p align="center"><b>😢 Sad</b> · italic serif, words fade in out of the blur, slow rain</p></td>
+<td width="50%"><img src="assets/readme/vibe-happy.jpg" alt="Happy vibe"><p align="center"><b>😄 Happy</b> · bouncy, colourful words with confetti on every line</p></td>
 </tr>
 <tr>
-<td><img src="assets/readme/style-wave.jpg" alt="Wave style"><p align="center"><b>Wave</b> · letters ride a gentle swell</p></td>
-<td><img src="assets/readme/style-pop.jpg" alt="Pop style"><p align="center"><b>Pop</b> · confetti-coloured and a bit tilted</p></td>
+<td><img src="assets/readme/vibe-intense.jpg" alt="Intense vibe"><p align="center"><b>🤘 Intense</b> · heavy capitals slam in and the screen shakes, rising embers</p></td>
+<td><img src="assets/readme/vibe-hype.jpg" alt="Hype vibe"><p align="center"><b>🔥 Hype</b> · left-aligned captions, the current word boxed in colour</p></td>
 </tr>
 <tr>
-<td colspan="2"><img src="assets/readme/style-typewriter.jpg" alt="Typewriter style"><p align="center"><b>Typewriter</b> · typed out letter by letter, cursor and all</p></td>
+<td><img src="assets/readme/vibe-dreamy.jpg" alt="Dreamy vibe"><p align="center"><b>☁️ Dreamy</b> · light lowercase floating at different heights, soft glowing orbs</p></td>
+<td><img src="assets/readme/vibe-electric.jpg" alt="Electric vibe"><p align="center"><b>⚡ Electric</b> · neon tubes flicker on and the background pulses on the beat</p></td>
 </tr>
 </table>
+
+| The song is… | You get |
+|---|---|
+| Rock, metal, punk | 🤘 Intense |
+| Hip-hop / rap (fast flow) | 🔥 Hype |
+| Dance, electronic, house | ⚡ Electric |
+| Pop, Latin, K-pop (upbeat) | 😄 Happy |
+| R&B, soul, acoustic, indie, slow songs | ☁️ Dreamy |
+| Any genre with heartbroken lyrics or a slow ballad | 😢 Sad |
+
+<br>
+
+<p align="center"><img src="assets/readme/controls.jpg" alt="Playback controls on the lyric screen" width="88%"><br><sub>Move the mouse and the playback bar appears.</sub></p>
 
 <br>
 
@@ -162,10 +194,13 @@ Pushing a tag like `v1.2.0` makes GitHub Actions build both installers and attac
 | | |
 |---|---|
 | **Click the tray / menu-bar icon** | Show the lyrics right now |
-| **Right-click the icon** | Settings: idle time, style, keep screen on, launch at login, demo song |
-| <kbd>←</kbd> &nbsp;<kbd>→</kbd> | Lyrics early or late? Shift them 0.25s (remembered) |
-| <kbd>S</kbd> | Cycle animation style |
-| **Move the mouse / any other key** | Close the lyric show |
+| **Right-click the icon** | Settings: idle time, lyric design, keep screen on, launch at login, demo song |
+| **Move the mouse** | Show the playback bar (previous · play / pause · next) and the Exit button |
+| <kbd>Space</kbd> | Play / pause |
+| <kbd>←</kbd> &nbsp;<kbd>→</kbd> | Previous / next song |
+| <kbd>[</kbd> &nbsp;<kbd>]</kbd> | Lyrics early or late? Shift them 0.25s (remembered) |
+| <kbd>V</kbd> | Cycle the design: auto → sad → happy → intense → hype → dreamy → electric |
+| <kbd>Esc</kbd>, **Exit**, or **click empty space** | Close the lyric show |
 
 <br>
 
@@ -176,20 +211,25 @@ flowchart LR
     A["🎧 Spotify / Apple Music<br/>playing on your computer"] --> B{"Which OS?"}
     B -- Windows --> C["Windows media session<br/>(same info as the volume flyout)"]
     B -- macOS --> D["Asks Spotify / Music<br/>via Apple Events"]
-    C --> E["🎵 Title · artist · position"]
+    C --> E["🎵 Title · artist · position<br/>+ album cover"]
     D --> E
     E --> F["📜 LRCLIB<br/>time-synced lyrics"]
-    F --> G["✨ Full-screen black canvas<br/>words animate in on beat"]
+    E --> H["🏷️ iTunes Search<br/>genre (+ cover fallback)"]
+    F --> V{"🎭 Vibe<br/>genre + lyric mood<br/>+ words per second"}
+    H --> V
+    V --> G["✨ Lyric show<br/>design per vibe,<br/>colours from the cover"]
 ```
 
 | Piece | Where it lives |
 |---|---|
 | Tray app, idle detection, power handling | [`src/main.js`](src/main.js) |
-| "What's playing" detection | [`src/detectors/`](src/detectors) |
+| "What's playing" detection + play / pause / skip | [`src/detectors/`](src/detectors) |
 | Lyric lookup and LRC parsing | [`src/lyrics.js`](src/lyrics.js) |
-| The animated lyric screen | [`src/renderer/`](src/renderer) |
+| Genre and album-art lookup | [`src/meta.js`](src/meta.js) |
+| Vibe detection | [`src/vibe.js`](src/vibe.js) |
+| The six designs, album colours, controls | [`src/renderer/`](src/renderer) |
 
-Built with [Electron](https://www.electronjs.org). Lyrics are provided by [LRCLIB](https://lrclib.net), a free, open lyrics database.
+Built with [Electron](https://www.electronjs.org). Lyrics are provided by [LRCLIB](https://lrclib.net), a free, open lyrics database; genres by the iTunes Search API.
 
 <br>
 
@@ -222,15 +262,24 @@ Only while music is actually playing and the lyrics are on screen. Pause for 2 m
 <details>
 <summary><b>What data does it send anywhere?</b></summary>
 <br>
-Only the song title, artist, album and length, sent to LRCLIB to look up lyrics. Nothing else, no analytics, no accounts.
+Only the song's title, artist, album and length: to LRCLIB to look up lyrics, and to Apple's iTunes Search to look up the genre and cover art. Nothing else, no analytics, no accounts.
+</details>
+
+<details>
+<summary><b>The vibe is wrong for a song</b></summary>
+<br>
+The guess comes from the genre, the lyric words and how fast they're sung, so it's occasionally off. Press <kbd>V</kbd> on the lyric screen, or pick a design in the tray menu under <i>Lyric design</i>, to choose one yourself.
 </details>
 
 <br>
 
 ## ✦ Roadmap
 
+- [x] Album-art colour palettes
+- [x] Vibe-matched lyric designs
+- [x] Playback controls on the lyric screen
 - [ ] Spotify Connect support (lyrics for music playing on your phone or speakers)
-- [ ] Album-art colour palettes
+- [ ] Real audio analysis (tempo / energy) for even better vibe matching
 - [ ] Multi-monitor mode
 - [ ] Signed and notarized installers
 - [ ] More animation moods

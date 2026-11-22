@@ -1,8 +1,7 @@
-// Cross-platform "what's playing right now" detector.
+// Cross-platform "what's playing right now" detector, plus play/pause/next/previous.
 // Windows: system media sessions via PowerShell (Spotify, Apple Music, browsers).
 // macOS:   asks the Spotify and Music apps directly via JavaScript for Automation.
 const { spawn, execFile } = require('child_process');
-const path = require('path');
 const { EventEmitter } = require('events');
 
 const MAC_SCRIPT = `
@@ -12,6 +11,8 @@ function info(name) {
     if (!a.running()) return null;
     const t = a.currentTrack();
     const dur = t.duration();
+    let artUrl = '';
+    if (name === 'Spotify') { try { artUrl = t.artworkUrl(); } catch (e) {} }
     return {
       app: name,
       title: t.name(),
@@ -19,12 +20,15 @@ function info(name) {
       album: t.album(),
       playing: String(a.playerState()) === 'playing',
       positionMs: Math.round(a.playerPosition() * 1000),
-      durationMs: name === 'Spotify' ? dur : Math.round(dur * 1000)
+      durationMs: name === 'Spotify' ? dur : Math.round(dur * 1000),
+      artUrl: artUrl
     };
   } catch (e) { return null; }
 }
 JSON.stringify({ sessions: [info('Spotify'), info('Music')].filter(Boolean) });
 `;
+
+const MAC_COMMANDS = { toggle: 'playpause', next: 'nextTrack', prev: 'previousTrack' };
 
 // Which app a session belongs to, so Spotify / Apple Music win over e.g. a YouTube tab.
 function sourceOf(appId = '') {
@@ -70,8 +74,21 @@ class NowPlaying extends EventEmitter {
 
   stop() {
     this.stopped = true;
-    if (this.proc) this.proc.kill();
+    if (this.proc) { this.proc.stdin.end(); this.proc.kill(); }
     clearTimeout(this.timer);
+  }
+
+  // action: 'toggle' | 'next' | 'prev'; app: the session's app id from the last update
+  control(action, app) {
+    if (process.platform === 'win32') {
+      if (this.proc?.stdin.writable) this.proc.stdin.write(`${action}\t${app || ''}\n`);
+    } else if (process.platform === 'darwin') {
+      const target = app === 'Music' ? 'Music' : 'Spotify';
+      const js = `Application(${JSON.stringify(target)}).${MAC_COMMANDS[action]}()`;
+      execFile('osascript', ['-l', 'JavaScript', '-e', js], { timeout: 4000 }, () => {
+        if (!this.inFlight) { clearTimeout(this.timer); this._macTick(); }  // show the new state right away
+      });
+    }
   }
 
   _handle(json) {
@@ -98,20 +115,22 @@ class NowPlaying extends EventEmitter {
         if (line) this._handle(line);
       }
     });
+    proc.stdin.on('error', () => {});
     proc.on('exit', () => {
       if (!this.stopped) setTimeout(() => this._startWindows(), 2000); // restart if it dies
     });
   }
 
-  _startMac() {
-    const tick = () => {
-      execFile('osascript', ['-l', 'JavaScript', '-e', MAC_SCRIPT], { timeout: 4000 }, (err, out) => {
-        if (!err) this._handle(out.trim());
-        if (!this.stopped) this.timer = setTimeout(tick, 800);
-      });
-    };
-    tick();
+  _macTick() {
+    this.inFlight = true;
+    execFile('osascript', ['-l', 'JavaScript', '-e', MAC_SCRIPT], { timeout: 4000 }, (err, out) => {
+      this.inFlight = false;
+      if (!err) this._handle(out.trim());
+      if (!this.stopped) this.timer = setTimeout(() => this._macTick(), 800);
+    });
   }
+
+  _startMac() { this._macTick(); }
 }
 
 module.exports = { NowPlaying };

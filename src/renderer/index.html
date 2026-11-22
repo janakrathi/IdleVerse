@@ -2,21 +2,44 @@
 <html>
 <head>
   <meta charset="utf-8">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'">
   <title>IdleVerse</title>
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="vibe-dreamy">
+  <div id="artbg"></div>
   <div id="blobs"><i></i><i></i><i></i></div>
+  <div id="shade"></div>
+  <canvas id="fx"></canvas>
+
   <main id="stage">
     <div id="prev" class="side"></div>
     <div id="current"></div>
     <div id="next" class="side"></div>
   </main>
+
   <footer id="info">
-    <div id="song"></div>
+    <div id="meta">
+      <img id="cover" alt="">
+      <div id="song"></div>
+    </div>
     <div id="bar"><span></span></div>
   </footer>
+
+  <div id="controls" aria-label="Playback controls">
+    <button id="btn-prev" title="Previous (←)" aria-label="Previous">
+      <svg viewBox="0 0 24 24"><path d="M6 5h2v14H6zM20 5v14L9.5 12z"/></svg>
+    </button>
+    <button id="btn-toggle" class="main" title="Play / pause (Space)" aria-label="Play or pause">
+      <svg class="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+      <svg class="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+    </button>
+    <button id="btn-next" title="Next (→)" aria-label="Next">
+      <svg viewBox="0 0 24 24"><path d="M16 5h2v14h-2zM4 5v14l10.5-7z"/></svg>
+    </button>
+  </div>
+  <button id="exit" title="Exit (Esc)">✕&nbsp; Exit</button>
+
   <div id="toast"></div>
   <script src="saver.js"></script>
 </body>

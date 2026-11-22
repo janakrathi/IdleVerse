@@ -3,9 +3,12 @@ const path = require('path');
 const fs = require('fs');
 const { NowPlaying } = require('./detectors');
 const { fetchLyrics } = require('./lyrics');
+const { getMeta, readArtFile, fetchArt } = require('./meta');
+const { detectVibe } = require('./vibe');
 const { DEMO_TRACK, DEMO_LYRICS } = require('./demo');
 
 const SNAP = process.argv.find((a) => a.startsWith('--snap='));   // dev: screenshot mode
+const arg = (k, d) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').split('=')[1] || d;
 if (!SNAP && !app.requestSingleInstanceLock()) app.quit();
 if (process.platform === 'darwin') app.dock?.hide(); // lives in the menu bar
 
@@ -13,7 +16,7 @@ if (process.platform === 'darwin') app.dock?.hide(); // lives in the menu bar
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
 const DEFAULTS = {
   idleSeconds: 60,        // start the screensaver after this much idle time while music plays (0 = never)
-  style: 'mix',           // mix | bounce | neon | wave | typewriter | pop
+  vibe: 'auto',           // auto | sad | happy | intense | hype | dreamy | electric
   keepAwake: true,        // stop the display sleeping while lyrics are on screen
   stopAfterPauseMin: 2,   // music paused this long -> close and let the screen sleep normally
   onlyMusicApps: true,    // ignore YouTube tabs etc.
@@ -21,21 +24,74 @@ const DEFAULTS = {
 };
 let settings = { ...DEFAULTS };
 try { settings = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(settingsFile(), 'utf8')) }; } catch {}
-const save = () => { try { fs.writeFileSync(settingsFile(), JSON.stringify(settings, null, 2)); } catch {} };
+delete settings.style;    // replaced by "vibe" in 1.1
+const save = () => { if (SNAP) return; try { fs.writeFileSync(settingsFile(), JSON.stringify(settings, null, 2)); } catch {} };
 
 // ---------- state ----------
 let tray, win, detector, blockerId = null;
 let track = null;             // current track info from the detector
-let lyrics = null;            // { kind, lines }
-let lyricsKey = '';
+// song: { key, lyrics, genre, vibe, appArt (cover from the music app), itunesArt (fallback), artSrc }
+let song = null;
 let pausedSince = null;
-let demoTimer = null;         // set while the built-in demo song is playing
+let demo = null;              // { started, pausedAt } while the built-in demo song is playing
 
 const keyOf = (t) => (t ? `${t.artist}|${t.title}` : '');
 
 function sendTrack() {
   if (!win || win.isDestroyed()) return;
-  win.webContents.send('track', { track, lyrics, settings });
+  win.webContents.send('track', {
+    track, settings,
+    lyrics: song?.lyrics || null,
+    art: song?.appArt || song?.itunesArt || null,
+    genre: song?.genre || null,
+    vibe: song?.vibe || null
+  });
+}
+
+// The music app's own cover. Re-read whenever it changes: apps often update the picture
+// a moment after the title, so the first one we see can still be the previous song's.
+function updateAppArt(t) {
+  const src = t.artPath || t.artUrl || '';
+  if (!song || src === song.artSrc) return;
+  song.artSrc = src;
+  const key = song.key;
+  if (!src) return;
+  if (t.artPath) {
+    song.appArt = readArtFile(t.artPath);
+    sendTrack();
+  } else {
+    fetchArt(t.artUrl).then((a) => { if (song?.key === key && song.artSrc === src) { song.appArt = a; sendTrack(); } });
+  }
+}
+
+// New song: fetch lyrics and genre side by side, then work out the vibe.
+function loadSong(t) {
+  const key = keyOf(t);
+  song = { key, lyrics: { kind: 'loading' }, genre: null, vibe: null, appArt: null, itunesArt: null, artSrc: null };
+  const current = () => song?.key === key;
+  const refresh = () => {
+    if (!current()) return;
+    if (song.lyrics.kind !== 'loading') song.vibe = detectVibe({ genre: song.genre, lyrics: song.lyrics });
+    sendTrack();
+  };
+
+  if (t.demo) {
+    song.lyrics = DEMO_LYRICS;
+    song.genre = t.genre;
+    const demoArt = (SNAP && arg('art', null)) || path.join(__dirname, '..', 'assets', 'icon.png');   // --art= for README shots
+    song.appArt = readArtFile(demoArt);
+    refresh();
+    return;
+  }
+  fetchLyrics(t)
+    .then((l) => { if (current()) song.lyrics = l; })
+    .catch(() => { if (current()) song.lyrics = { kind: 'none' }; })
+    .finally(refresh);
+  getMeta(t)
+    .then((m) => { if (current()) { song.genre = m.genre; song.itunesArt = m.art; } })
+    .catch(() => {})
+    .finally(refresh);
+  sendTrack();
 }
 
 function onUpdate(t) {
@@ -43,19 +99,8 @@ function onUpdate(t) {
   if (t && t.playing) pausedSince = null;
   else if (!pausedSince) pausedSince = Date.now();
 
-  const key = keyOf(t);
-  if (t && key !== lyricsKey) {
-    lyricsKey = key;
-    if (t.demo) {
-      lyrics = DEMO_LYRICS;
-    } else {
-      lyrics = { kind: 'loading' };
-      fetchLyrics(t)
-        .then((l) => { if (lyricsKey === key) { lyrics = l; sendTrack(); } })
-        .catch(() => { if (lyricsKey === key) { lyrics = { kind: 'none' }; sendTrack(); } });
-    }
-    sendTrack();
-  }
+  if (t && keyOf(t) !== song?.key) loadSong(t);
+  if (t && !t.demo) updateAppArt(t);
   if (win && !win.isDestroyed()) {
     win.webContents.send('position', {
       playing: !!t?.playing,
@@ -67,21 +112,38 @@ function onUpdate(t) {
 }
 
 // ---------- demo song (original lyrics, loops) ----------
+let demoTimer = null;
+function demoFeed() {
+  const now = demo.pausedAt ?? Date.now();
+  onUpdate({ ...DEMO_TRACK, playing: !demo.pausedAt, positionMs: (now - demo.started) % DEMO_TRACK.durationMs });
+}
 function startDemo() {
   stopDemo();
-  const started = Date.now();
-  const feed = () => onUpdate({ ...DEMO_TRACK, positionMs: (Date.now() - started) % DEMO_TRACK.durationMs });
-  feed();
-  demoTimer = setInterval(feed, 700);
+  demo = { started: Date.now(), pausedAt: null };
+  demoFeed();
+  demoTimer = setInterval(demoFeed, 700);
   showSaver(true);
 }
-
 function stopDemo() {
-  if (!demoTimer) return;
+  if (!demo) return;
   clearInterval(demoTimer);
-  demoTimer = null;
-  track = null; lyrics = null; lyricsKey = '';
+  demo = null; track = null; song = null;
 }
+
+// ---------- playback controls ----------
+ipcMain.on('control', (_e, action) => {
+  if (demo) {
+    if (action === 'toggle') {
+      if (demo.pausedAt) { demo.started += Date.now() - demo.pausedAt; demo.pausedAt = null; }
+      else demo.pausedAt = Date.now();
+    } else {
+      demo.started = Date.now(); demo.pausedAt = null;        // next / prev: restart
+    }
+    demoFeed();
+    return;
+  }
+  if (track) detector.control(action, track.app);
+});
 
 // ---------- the lyrics window ----------
 function showSaver(manual = false) {
@@ -107,7 +169,10 @@ function showSaver(manual = false) {
     win.once('ready-to-show', () => { win.show(); win.focus(); });
   }
   win.loadFile(path.join(__dirname, 'renderer', 'index.html'));
-  win.webContents.once('did-finish-load', () => { win.webContents.send('mode', { manual }); sendTrack(); });
+  win.webContents.once('did-finish-load', () => {
+    win.webContents.send('mode', { manual, snap: !!SNAP, showControls: process.argv.includes('--controls') });
+    sendTrack();
+  });
   win.on('closed', () => { win = null; releaseAwake(); stopDemo(); });
   if (settings.keepAwake) blockerId = powerSaveBlocker.start('prevent-display-sleep');
 }
@@ -129,7 +194,7 @@ setInterval(() => {
     showSaver(false);
   }
   // Music stopped for a while: get out of the way so the OS can power the display down.
-  if (showing && pausedSince && Date.now() - pausedSince > settings.stopAfterPauseMin * 60000) {
+  if (showing && !demo && pausedSince && Date.now() - pausedSince > settings.stopAfterPauseMin * 60000) {
     hideSaver();
   }
 }, 2000);
@@ -138,7 +203,7 @@ powerMonitor.on('lock-screen', hideSaver);
 powerMonitor.on('suspend', hideSaver);
 
 ipcMain.on('dismiss', hideSaver);
-ipcMain.on('set', (_e, patch) => { Object.assign(settings, patch); save(); buildMenu(); });
+ipcMain.on('set', (_e, patch) => { Object.assign(settings, patch); save(); buildMenu(); sendTrack(); });
 
 // ---------- tray ----------
 function updateTrayTooltip() {
@@ -162,13 +227,15 @@ function buildMenu() {
       radio('After 5 minutes', 'idleSeconds', 300),
       radio('Never (manual only)', 'idleSeconds', 0)
     ] },
-    { label: 'Animation style', submenu: [
-      radio('Mix it up', 'style', 'mix'),
-      radio('Bounce', 'style', 'bounce'),
-      radio('Neon', 'style', 'neon'),
-      radio('Wave', 'style', 'wave'),
-      radio('Typewriter', 'style', 'typewriter'),
-      radio('Pop', 'style', 'pop')
+    { label: 'Lyric design', submenu: [
+      radio('Match the song’s vibe (auto)', 'vibe', 'auto'),
+      { type: 'separator' },
+      radio('Sad — slow fade', 'vibe', 'sad'),
+      radio('Happy — bouncy & bright', 'vibe', 'happy'),
+      radio('Intense — rock slam', 'vibe', 'intense'),
+      radio('Hype — hip-hop captions', 'vibe', 'hype'),
+      radio('Dreamy — soft float', 'vibe', 'dreamy'),
+      radio('Electric — neon pulse', 'vibe', 'electric')
     ] },
     { label: 'Keep screen on while lyrics show', type: 'checkbox', checked: settings.keepAwake,
       click: (i) => { settings.keepAwake = i.checked; save(); } },
@@ -193,22 +260,45 @@ app.whenReady().then(() => {
     ? path.join(process.resourcesPath, 'win-nowplaying.ps1')
     : path.join(__dirname, 'detectors', 'win-nowplaying.ps1');
   detector = new NowPlaying({ scriptPath, onlyMusicApps: settings.onlyMusicApps });
-  detector.on('update', (t) => { if (!demoTimer) onUpdate(t); });
+  detector.on('update', (t) => { if (!demo) onUpdate(t); });
   detector.start();
 
-  if (process.argv.includes('--demo')) setTimeout(startDemo, 800);
+  // Dev helper: `--song="Title|Artist" --snap=...` plays a pretend track through the real
+  // lyrics / cover / vibe pipeline (no music app involved), 40s into the song.
+  const fake = SNAP && arg('song', null);
+  if (fake) {
+    const [title, artist] = fake.split('|');
+    const t0 = Date.now() - 40000;
+    detector.removeAllListeners('update');
+    setInterval(() => onUpdate({ app: 'test', title, artist, album: '', playing: true, positionMs: Date.now() - t0, durationMs: 220000 }), 700);
+    setTimeout(() => showSaver(true), 500);
+  } else if (process.argv.includes('--demo')) setTimeout(startDemo, 800);
   else if (process.argv.includes('--show')) setTimeout(() => showSaver(true), 1500);
 
-  // Dev helper: `electron . --demo --snap=<dir> [--style=pop] [--frames=40] [--every=150]`
-  // saves numbered PNG frames of the lyrics screen, then quits. Used for the README images.
+  // Dev helper for README images:
+  //   electron . --demo --snap=<dir> [--vibe=sad] [--controls] [--frames=3] [--every=4000] [--start=3000] [--fps=24]
+  // saves frames of the lyrics screen (rendered off-screen), then quits.
   if (SNAP) {
     const dir = SNAP.slice(7);
-    const arg = (k, d) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').split('=')[1] || d;
-    const style = arg('style', null);
-    if (style) settings.style = style;
+    settings.vibe = arg('vibe', settings.vibe);
     const frames = Number(arg('frames', 3)), every = Number(arg('every', 4000)), start = Number(arg('start', 3000));
     const width = Number(arg('width', 1280));
     const fps = Number(arg('fps', 0));
+    if (process.argv.includes('--perf')) {
+      // Measures how smoothly the lyric screen animates for 6 seconds, then quits.
+      setTimeout(async () => {
+        const r = await win.webContents.executeJavaScript(`new Promise((done) => {
+          const gaps = []; let last = performance.now(); const t0 = last;
+          (function f(t) { gaps.push(t - last); last = t; if (t - t0 < 6000) requestAnimationFrame(f); else {
+            gaps.sort((a, b) => a - b);
+            done({ fps: +(gaps.length / ((t - t0) / 1000)).toFixed(1), p95: +gaps[Math.floor(gaps.length * .95)].toFixed(1), worst: +gaps[gaps.length - 1].toFixed(1) });
+          } })(last);
+        })`);
+        fs.writeFileSync(path.join(dir, 'perf.json'), JSON.stringify(r));
+        app.exit(0);
+      }, start);
+      return;
+    }
     if (fps) {
       // Video mode: grab every painted frame from the off-screen renderer (smooth, for GIFs).
       let n = 0, recording = false;
@@ -225,16 +315,12 @@ app.whenReady().then(() => {
       }, start);
       return;
     }
-    let n = 0, t0 = 0;
+    let n = 0;
     setTimeout(function grab() {
       if (win && !win.isDestroyed()) {
-        t0 = t0 || Date.now();
         win.webContents.capturePage().then((img) => {
           fs.writeFileSync(path.join(dir, `frame${String(n).padStart(3, '0')}.png`), img.resize({ width }).toPNG());
-          if (++n >= frames) {
-            fs.writeFileSync(path.join(dir, 'timing.json'), JSON.stringify({ frames: n, ms: Date.now() - t0 }));
-            app.exit(0);
-          } else setTimeout(grab, every);
+          if (++n >= frames) app.exit(0); else setTimeout(grab, every);
         });
       } else setTimeout(grab, 500);
     }, start);

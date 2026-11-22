@@ -6,6 +6,7 @@ const DEMO_TRACK = {
   album: 'Demo',
   playing: true,
   durationMs: 42000,
+  genre: 'Pop',
   demo: true
 };
 
