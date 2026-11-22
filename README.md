@@ -122,7 +122,7 @@ Every song gets the design that fits it, and the backlight, glow and accents are
 </tr>
 <tr>
 <td><img src="assets/readme/vibe-intense.jpg" alt="Intense vibe"><p align="center"><b>🤘 Intense</b> · condensed capitals that hit with a shake and a slash of colour</p></td>
-<td><img src="assets/readme/vibe-hype.jpg" alt="Hype vibe"><p align="center"><b>🔥 Hype</b> · tilted heavy captions with the key word stamped in a box</p></td>
+<td><img src="assets/readme/vibe-hype.jpg" alt="Hype vibe"><p align="center"><b>🔥 Hype</b> · sharp Impact poster type with a hard colour offset and a blade-cut bar</p></td>
 </tr>
 <tr>
 <td><img src="assets/readme/vibe-dreamy.jpg" alt="Dreamy vibe"><p align="center"><b>☁️ Dreamy</b> · thin lowercase that floats in slowly, soft glowing orbs</p></td>

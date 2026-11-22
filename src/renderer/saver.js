@@ -237,11 +237,18 @@ const fx = (() => {
 // One thick glowing beam running round the very edge of the screen, bending round each
 // corner as it turns. Its speed follows the song: quicker when the words come fast, a
 // surge on every word (bigger on the key word), a slow glide in breaks, and still when paused.
+//
+// The glow is drawn on a tiny canvas, blurred once and stretched to full size, which gives
+// one smooth haze (no visible bands) for very little work. The crisp white core is drawn on
+// top at full resolution, with a rounded head and a small glowing dot leading the way.
 const frame = (() => {
   const canvas = $('frame'), ctx = canvas.getContext('2d');
+  const S = 6;                                                   // glow canvas is 1/6 size
+  const small = document.createElement('canvas'), sctx = small.getContext('2d');
+  const soft = document.createElement('canvas'), bctx = soft.getContext('2d');
   // Laps of the screen per second at a normal pace, per vibe.
   const BASE = { sad: 0.016, dreamy: 0.022, happy: 0.042, hype: 0.048, electric: 0.056, intense: 0.062 };
-  let w = 0, h = 0, colour = 'hsl(0 0% 70%)';
+  let w = 0, h = 0, colour = 'hsl(0 0% 70%)', dot = null;
   let pos = Math.random(), speed = 0, rate = 0.8, rateTarget = 0.8, energy = 0;
   let last = performance.now(), settled = false;
 
@@ -250,11 +257,24 @@ const frame = (() => {
     w = innerWidth; h = innerHeight;
     canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    small.width = soft.width = Math.ceil(w / S); small.height = soft.height = Math.ceil(h / S);
     settled = false;
   }
   addEventListener('resize', resize); resize();
 
-  function setColour(c) { colour = c; settled = false; }
+  function setColour(c) {
+    colour = c;
+    dot = document.createElement('canvas');                      // the little glowing dot at the head
+    dot.width = dot.height = 64;
+    const g = dot.getContext('2d'), grad = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+    grad.addColorStop(0, 'rgba(255,255,255,1)');
+    grad.addColorStop(0.22, 'rgba(255,255,255,.9)');
+    grad.addColorStop(0.45, c.replace(')', ' / .55)'));
+    grad.addColorStop(1, c.replace(')', ' / 0)'));
+    g.fillStyle = grad; g.fillRect(0, 0, 64, 64);
+    settled = false;
+  }
+  setColour(colour);
 
   const kick = (a) => { energy = Math.min(1.6, energy + a); };
   const setFlow = (wordsPerSec) => { rateTarget = Math.max(0.2, Math.min(5, wordsPerSec)); };
@@ -270,7 +290,7 @@ const frame = (() => {
     pos = (pos + speed * dt) % 1;
     if (paused && speed < 1e-4 && energy < 0.01) { if (settled) return; settled = true; } else settled = false;
 
-    const m = 5;                                  // the beam's core sits flush with the screen edge
+    const m = 4;                                  // the core sits flush with the screen edge
     const W = w - 2 * m, H = h - 2 * m, P = 2 * (W + H);
     const corners = [[m, m, 0], [m + W, m, W], [m + W, m + H, W + H], [m, m + H, 2 * W + H]];
     const pt = (s) => {
@@ -280,40 +300,53 @@ const frame = (() => {
       if (s < 2 * W + H) return [m + W - (s - W - H), m + H];
       return [m, m + H - (s - 2 * W - H)];
     };
-    const seg = (a, b) => {                       // path from a to b along the frame, turning corners
-      ctx.moveTo(...pt(a));
+    const seg = (c, a, b, k = 1) => {             // path from a to b along the frame, turning corners
+      const [ax, ay] = pt(a); c.moveTo(ax * k, ay * k);
       for (const [x, y, cs] of corners) {
-        for (const k of [cs, cs + P, cs - P]) if (k > a && k < b) ctx.lineTo(x, y);
+        for (const q of [cs, cs + P, cs - P]) if (q > a && q < b) c.lineTo(x * k, y * k);
       }
-      ctx.lineTo(...pt(b));
+      const [bx, by] = pt(b); c.lineTo(bx * k, by * k);
     };
 
-    ctx.clearRect(0, 0, w, h);
-    ctx.strokeStyle = colour;
-    ctx.globalAlpha = 0.08; ctx.lineWidth = 1;
-    ctx.strokeRect(m, m, W, H);
-
-    // One thick, glowing beam travelling clockwise; it wraps round the corners as it goes.
     const bright = 0.8 + Math.min(0.2, energy * 0.25);
     const head = pos * P;
     const tail = P * (0.2 + 0.06 * Math.min(1, energy));
     const N = Math.min(140, Math.max(40, Math.round(tail / 7)));   // ~7px steps so the fade is smooth
+    const fadeAt = (j) => Math.pow(1 - j / N, 1.4) * bright;
+
+    // 1) Glow: draw the tail small, blur it once, stretch it over the screen.
+    sctx.clearRect(0, 0, small.width, small.height);
+    sctx.strokeStyle = colour; sctx.lineCap = 'butt'; sctx.lineJoin = 'round'; sctx.lineWidth = 26 / S;
+    for (let j = 0; j < N; j++) {
+      sctx.beginPath(); seg(sctx, head - (tail * (j + 1)) / N, head - (tail * j) / N, 1 / S);
+      sctx.globalAlpha = fadeAt(j); sctx.stroke();
+    }
+    bctx.clearRect(0, 0, soft.width, soft.height);
+    bctx.filter = `blur(${(14 / S).toFixed(2)}px)`;
+    bctx.drawImage(small, 0, 0);
+    bctx.filter = 'none';
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = colour; ctx.globalAlpha = 0.08; ctx.lineWidth = 1;
+    ctx.strokeRect(m, m, W, H);                    // the faint frame the beam runs along
+
     ctx.globalCompositeOperation = 'lighter';
-    ctx.lineCap = 'butt'; ctx.lineJoin = 'round';      // segments butt together without bright beads
-    // Stacked strokes, widest and faintest first, give a soft glow that fades in from the edge.
-    // The wide faint layers are drawn in coarser steps; nobody can see banding that faint.
-    const pass = (n, layers) => {
-      for (let j = 0; j < n; j++) {
-        const a = head - (tail * (j + 1)) / n, b = head - (tail * j) / n;
-        const fade = Math.pow(1 - j / n, 1.4) * bright;
-        ctx.beginPath(); seg(a, b);
-        for (const [lw, alpha, col] of layers) {
-          ctx.strokeStyle = col; ctx.globalAlpha = fade * alpha; ctx.lineWidth = lw; ctx.stroke();
-        }
-      }
-    };
-    pass(Math.ceil(N / 2), [[96, 0.035, colour], [74, 0.045, colour], [56, 0.065, colour], [40, 0.09, colour]]);
-    pass(N, [[28, 0.16, colour], [18, 0.3, colour], [9, 1, '#fff']]);                // glow + hot white core
+    ctx.imageSmoothingEnabled = true;
+    ctx.globalAlpha = 0.95; ctx.drawImage(soft, 0, 0, soft.width * S, soft.height * S);
+    ctx.globalAlpha = 0.5;  ctx.drawImage(small, 0, 0, small.width * S, small.height * S);   // tighter inner glow
+
+    // 2) Core: a crisp white line that fades along the tail, with a rounded head.
+    ctx.strokeStyle = '#fff'; ctx.lineCap = 'butt'; ctx.lineJoin = 'round'; ctx.lineWidth = 6;
+    for (let j = 0; j < N; j++) {
+      ctx.beginPath(); seg(ctx, head - (tail * (j + 1)) / N, head - (tail * j) / N);
+      ctx.globalAlpha = fadeAt(j); ctx.stroke();
+    }
+    const [hx, hy] = pt(head);
+    ctx.globalAlpha = bright; ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(hx, hy, 3, 0, Math.PI * 2); ctx.fill();
+    const r = 15 + 7 * Math.min(1, energy);
+    ctx.globalAlpha = 0.9 * bright; ctx.drawImage(dot, hx - r, hy - r, r * 2, r * 2);
+
     ctx.globalCompositeOperation = 'source-over';
     ctx.globalAlpha = 1;
   }
