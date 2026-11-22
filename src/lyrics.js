@@ -1,6 +1,6 @@
 // Lyrics come from LRCLIB (https://lrclib.net) — free, no account or API key,
 // and most songs have time-synced lyrics.
-const UA = 'IdleVerse/1.0 (https://github.com/janakrathi/idleverse)';
+const UA = 'IdleVerse/1.0 (https://github.com/janakrathi/IdleVerse)';
 const cache = new Map();
 
 function parseLrc(lrc) {

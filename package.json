@@ -1,11 +1,11 @@
 {
   "name": "idleverse",
   "productName": "IdleVerse",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Step away from your desk and your screen becomes a dark, power-saving lyrics show for whatever is playing in Spotify or Apple Music.",
   "author": "janakrathi",
-  "homepage": "https://github.com/janakrathi/idleverse",
-  "repository": { "type": "git", "url": "https://github.com/janakrathi/idleverse.git" },
+  "homepage": "https://github.com/janakrathi/IdleVerse",
+  "repository": { "type": "git", "url": "https://github.com/janakrathi/IdleVerse.git" },
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
@@ -22,18 +22,25 @@
     "appId": "com.janakrathi.idleverse",
     "productName": "IdleVerse",
     "afterPack": "scripts/adhoc-sign.js",
-    "files": ["src/**/*", "assets/icon.png"],
+    "files": ["src/**/*", "assets/icon.png", "assets/icon.ico", "assets/trayTemplate.png", "assets/trayTemplate@2x.png"],
+    "asarUnpack": ["assets/**"],
     "extraResources": [{ "from": "src/detectors/win-nowplaying.ps1", "to": "win-nowplaying.ps1" }],
-    "publish": [{ "provider": "github", "owner": "janakrathi", "repo": "idleverse", "releaseType": "release" }],
+    "publish": [{ "provider": "github", "owner": "janakrathi", "repo": "IdleVerse", "releaseType": "release" }],
     "win": {
       "target": [{ "target": "nsis", "arch": ["x64"] }],
-      "icon": "assets/icon.png",
+      "icon": "assets/icon.ico",
       "artifactName": "IdleVerse-Setup-${version}.${ext}"
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
-      "runAfterFinish": true
+      "runAfterFinish": true,
+      "createStartMenuShortcut": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "IdleVerse",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico",
+      "uninstallDisplayName": "IdleVerse"
     },
     "mac": {
       "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],

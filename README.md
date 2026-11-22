@@ -1,5 +1,9 @@
 <div align="center">
 
+<img src="assets/icon.png" alt="IdleVerse logo" width="110">
+
+<br><br>
+
 <img src="assets/readme/banner.svg" alt="IdleVerse" width="100%">
 
 <br>
@@ -10,7 +14,7 @@ turns your display dark to save power, and shows the lyrics live, synced and ani
 
 <br>
 
-[![Download](https://img.shields.io/github/v/release/janakrathi/idleverse?style=for-the-badge&label=download&color=c77dff&labelColor=0d0d0d)](https://github.com/janakrathi/idleverse/releases/latest)
+[![Download](https://img.shields.io/github/v/release/janakrathi/IdleVerse?style=for-the-badge&label=download&color=c77dff&labelColor=0d0d0d)](https://github.com/janakrathi/IdleVerse/releases/latest)
 [![Windows](https://img.shields.io/badge/Windows-10%20%7C%2011-ff5fb8?style=for-the-badge&logo=windows&logoColor=white&labelColor=0d0d0d)](#-install)
 [![macOS](https://img.shields.io/badge/macOS-Intel%20%26%20Apple%20Silicon-6cf5a2?style=for-the-badge&logo=apple&logoColor=white&labelColor=0d0d0d)](#-install)
 [![License](https://img.shields.io/badge/license-MIT-ffffff?style=for-the-badge&labelColor=0d0d0d)](LICENSE)
@@ -129,17 +133,18 @@ Every song gets the design that fits it, and the backlight, glow and accents are
 ## ✦ Install
 
 > [!TIP]
-> Grab the latest installer from the **[Releases page](https://github.com/janakrathi/idleverse/releases/latest)**. No coding needed.
+> Grab the latest installer from the **[Releases page](https://github.com/janakrathi/IdleVerse/releases/latest)**. No coding needed.
 
 <details open>
 <summary><b>&nbsp;🪟 &nbsp;Windows 10 / 11</b></summary>
 
 <br>
 
-1. Download **`IdleVerse-Setup-x.x.x.exe`** from [Releases](https://github.com/janakrathi/idleverse/releases/latest).
+1. Download **`IdleVerse-Setup-x.x.x.exe`** from [Releases](https://github.com/janakrathi/IdleVerse/releases/latest).
 2. Open it. If Windows shows **"Windows protected your PC"**, click **More info → Run anyway**. This appears because the app isn't code-signed yet.
-3. Finish the installer. IdleVerse launches and a ♪ icon appears in your system tray (look under the **^** arrow next to the clock).
+3. Finish the installer. IdleVerse launches and its round purple icon appears in your system tray (look under the **^** arrow next to the clock).
 4. Play something in **Spotify** or **Apple Music**, then click the tray icon to see it in action.
+5. Next time, just press the **Windows key** and type **IdleVerse**, or use the desktop shortcut. To have it start by itself, right-click the tray icon and tick **Open at login**.
 
 </details>
 
@@ -148,7 +153,7 @@ Every song gets the design that fits it, and the backlight, glow and accents are
 
 <br>
 
-1. Download the right **`.dmg`** from [Releases](https://github.com/janakrathi/idleverse/releases/latest):
+1. Download the right **`.dmg`** from [Releases](https://github.com/janakrathi/IdleVerse/releases/latest):
    - **`mac-arm64`** for M1, M2, M3 or M4 Macs
    - **`mac-x64`** for older Intel Macs
 2. Open the `.dmg` and drag **IdleVerse** into **Applications**.
@@ -157,7 +162,7 @@ Every song gets the design that fits it, and the backlight, glow and accents are
    ```bash
    xattr -cr /Applications/IdleVerse.app
    ```
-4. A ♪ icon appears in your menu bar. When asked, **allow IdleVerse to control Spotify / Music**; that's how it reads the current song.
+4. The IdleVerse icon appears in your menu bar. When asked, **allow IdleVerse to control Spotify / Music**; that's how it reads the current song. Next time, open it with **Spotlight** (⌘ Space, type *IdleVerse*).
 
 </details>
 
@@ -169,7 +174,7 @@ Every song gets the design that fits it, and the backlight, glow and accents are
 You need [Node.js](https://nodejs.org) 18 or newer.
 
 ```bash
-git clone https://github.com/janakrathi/idleverse.git
+git clone https://github.com/janakrathi/IdleVerse.git
 cd idleverse
 npm install
 npm start          # runs in the tray / menu bar
@@ -284,7 +289,7 @@ The guess comes from the genre, the lyric words and how fast they're sung, so it
 - [ ] Signed and notarized installers
 - [ ] More animation moods
 
-Ideas and pull requests are very welcome. [Open an issue](https://github.com/janakrathi/idleverse/issues).
+Ideas and pull requests are very welcome. [Open an issue](https://github.com/janakrathi/IdleVerse/issues).
 
 <br>
 

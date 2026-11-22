@@ -250,10 +250,25 @@ function buildMenu() {
   ]));
 }
 
+// Ties the app to its Start menu shortcut on Windows (search, taskbar and notifications).
+if (process.platform === 'win32') app.setAppUserModelId('com.janakrathi.idleverse');
+
+function trayIcon() {
+  // In the installed app the icons sit outside app.asar (see "asarUnpack" in package.json),
+  // because Windows can't read .ico files from inside the archive.
+  const assets = path.join(__dirname, '..', 'assets').replace(`app.asar${path.sep}`, `app.asar.unpacked${path.sep}`);
+  if (process.platform === 'darwin') {
+    // Monochrome "template" image: macOS colours it to match a light or dark menu bar.
+    const img = nativeImage.createFromPath(path.join(assets, 'trayTemplate.png'));
+    img.setTemplateImage(true);
+    return img;
+  }
+  // Windows: the round logo; the .ico holds every size so it's sharp at any display scaling.
+  return path.join(assets, 'icon.ico');
+}
+
 app.whenReady().then(() => {
-  let icon = nativeImage.createFromPath(path.join(__dirname, '..', 'assets', 'icon.png'));
-  icon = icon.resize({ width: process.platform === 'darwin' ? 18 : 16 });
-  tray = new Tray(icon);
+  tray = new Tray(trayIcon());
   tray.on('click', () => showSaver(true));
   buildMenu();
   updateTrayTooltip();
@@ -282,6 +297,13 @@ app.whenReady().then(() => {
   // saves frames of the lyrics screen (rendered off-screen), then quits.
   if (SNAP) {
     const dir = SNAP.slice(7);
+    if (process.argv.includes('--check-tray')) {          // dev: confirm the tray icon loads in a packaged build
+      const t = trayIcon();
+      const img = typeof t === 'string' ? nativeImage.createFromPath(t) : t;
+      fs.writeFileSync(path.join(dir, 'tray.json'), JSON.stringify({ path: typeof t === 'string' ? t : 'template', empty: img.isEmpty(), size: img.getSize() }));
+      app.exit(0);
+      return;
+    }
     settings.vibe = arg('vibe', settings.vibe);
     const frames = Number(arg('frames', 3)), every = Number(arg('every', 4000)), start = Number(arg('start', 3000));
     const width = Number(arg('width', 1280));
