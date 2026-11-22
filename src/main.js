@@ -15,7 +15,7 @@ if (process.platform === 'darwin') app.dock?.hide(); // lives in the menu bar
 // ---------- settings ----------
 const settingsFile = () => path.join(app.getPath('userData'), 'settings.json');
 const DEFAULTS = {
-  idleSeconds: 60,        // start the screensaver after this much idle time while music plays (0 = never)
+  idleSeconds: 15,        // start the screensaver after this much idle time while music plays (0 = never)
   vibe: 'auto',           // auto | sad | happy | intense | hype | dreamy | electric
   keepAwake: true,        // stop the display sleeping while lyrics are on screen
   stopAfterPauseMin: 2,   // music paused this long -> close and let the screen sleep normally
@@ -29,6 +29,9 @@ const DEFAULTS = {
 let settings = { ...DEFAULTS };
 try { settings = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(settingsFile(), 'utf8')) }; } catch {}
 delete settings.style;    // replaced by "vibe" in 1.1
+// 1.3.1: the default idle time went from 1 minute to 15 seconds. Settings files saved by
+// older versions hold the old default, so move them over once.
+if (!settings.v) { if (settings.idleSeconds === 60) settings.idleSeconds = 15; settings.v = 2; }
 const save = () => { if (SNAP) return; try { fs.writeFileSync(settingsFile(), JSON.stringify(settings, null, 2)); } catch {} };
 
 // ---------- state ----------

@@ -53,7 +53,7 @@ Lyrics are time-synced, and each word appears as it's sung. If the timing is a l
 <td valign="top">
 
 **🎬 &nbsp;Kinetic typography**<br>
-Every line is laid out like a little poster: the key word goes big, small words sit in spaced-out type, and words rise, wipe and slide in with underlines, highlight bars, circles and brackets animating around them.
+Every line is laid out like a little poster: the key word goes big, small words sit in spaced-out type, and words rise, wipe and slide in with underlines, highlight bars, circles and brackets animating around them. A glowing beam races round the edge of the screen, speeding up and surging with the song.
 
 </td>
 <td valign="top">
@@ -214,7 +214,7 @@ Pushing a tag like `v1.2.0` makes GitHub Actions build both installers and attac
 | | |
 |---|---|
 | **Click the tray / menu-bar icon** | Show the lyrics right now |
-| **Right-click the icon** | Settings: idle time, lyric design, keep screen on, launch at login, demo song |
+| **Right-click the icon** | Settings: idle time (15 seconds by default), lyric design, keep screen on, launch at login, demo song |
 | **Move the mouse** | Show the playback bar (previous · play / pause · next) and the Exit button |
 | <kbd>Space</kbd> | Play / pause |
 | <kbd>←</kbd> &nbsp;<kbd>→</kbd> | Previous / next song |

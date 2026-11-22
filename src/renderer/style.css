@@ -49,7 +49,8 @@ body.paused #stage, body.paused #fx { opacity: .35; }
 /* Darkens the middle so lyrics stay readable and the screen stays mostly dark (power saving). */
 #shade { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(ellipse 70% 60% at 50% 48%, rgba(0,0,0,.62), rgba(0,0,0,.25) 70%, rgba(0,0,0,.35)); }
 
-#fx { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+#fx, #frame { position: fixed; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+body.paused #frame { opacity: .45; }
 
 /* ---- stage ---- */
 #stage {
@@ -102,13 +103,6 @@ body {
 .a-left .block { align-items: flex-start; text-align: left; }
 .a-center .block { align-items: center; text-align: center; }
 .a-right .block { align-items: flex-end; text-align: right; }
-
-.tag {
-  font: 500 max(11px, 1.3vh) var(--mono); letter-spacing: .3em; color: var(--c1); opacity: 0;
-  margin-bottom: 1.6vh; animation: fadeIn .6s .1s ease forwards;
-}
-.tag b { color: rgba(255,255,255,.35); font-weight: 400; }
-@keyframes fadeIn { to { opacity: .8; } }
 
 .row { position: relative; white-space: nowrap; padding: .04em .06em; }
 .txt { position: relative; display: inline-block; }

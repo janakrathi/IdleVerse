@@ -90,6 +90,7 @@ function applyColours() {
     colours.push(`hsl(${H} ${sat}% ${Math.round(t.l * 100)}%)`);
   });
   fx.setColours(colours);
+  frame.setColour(colours[0]);
 }
 
 // The cover is blurred ONCE into a tiny canvas; scaling that up gives a soft backlight
@@ -232,6 +233,94 @@ const fx = (() => {
   return { setMode, setColours };
 })();
 
+// =================== shiny frame ===================
+// One thick glowing beam running round the very edge of the screen, bending round each
+// corner as it turns. Its speed follows the song: quicker when the words come fast, a
+// surge on every word (bigger on the key word), a slow glide in breaks, and still when paused.
+const frame = (() => {
+  const canvas = $('frame'), ctx = canvas.getContext('2d');
+  // Laps of the screen per second at a normal pace, per vibe.
+  const BASE = { sad: 0.016, dreamy: 0.022, happy: 0.042, hype: 0.048, electric: 0.056, intense: 0.062 };
+  let w = 0, h = 0, colour = 'hsl(0 0% 70%)';
+  let pos = Math.random(), speed = 0, rate = 0.8, rateTarget = 0.8, energy = 0;
+  let last = performance.now(), settled = false;
+
+  function resize() {
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    w = innerWidth; h = innerHeight;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    settled = false;
+  }
+  addEventListener('resize', resize); resize();
+
+  function setColour(c) { colour = c; settled = false; }
+
+  const kick = (a) => { energy = Math.min(1.6, energy + a); };
+  const setFlow = (wordsPerSec) => { rateTarget = Math.max(0.2, Math.min(5, wordsPerSec)); };
+
+  function draw(t) {
+    requestAnimationFrame(draw);
+    const dt = Math.min(0.1, (t - last) / 1000); last = t;
+    const paused = document.body.classList.contains('paused');
+    rate += (rateTarget - rate) * Math.min(1, dt * 1.2);
+    energy *= Math.exp(-dt * 2.4);
+    const want = paused ? 0 : (BASE[vibe] || 0.03) * (0.35 + rate * 0.45) * (1 + energy * 1.5);
+    speed += (want - speed) * Math.min(1, dt * 3);
+    pos = (pos + speed * dt) % 1;
+    if (paused && speed < 1e-4 && energy < 0.01) { if (settled) return; settled = true; } else settled = false;
+
+    const m = 5;                                  // the beam's core sits flush with the screen edge
+    const W = w - 2 * m, H = h - 2 * m, P = 2 * (W + H);
+    const corners = [[m, m, 0], [m + W, m, W], [m + W, m + H, W + H], [m, m + H, 2 * W + H]];
+    const pt = (s) => {
+      s = ((s % P) + P) % P;
+      if (s < W) return [m + s, m];
+      if (s < W + H) return [m + W, m + s - W];
+      if (s < 2 * W + H) return [m + W - (s - W - H), m + H];
+      return [m, m + H - (s - 2 * W - H)];
+    };
+    const seg = (a, b) => {                       // path from a to b along the frame, turning corners
+      ctx.moveTo(...pt(a));
+      for (const [x, y, cs] of corners) {
+        for (const k of [cs, cs + P, cs - P]) if (k > a && k < b) ctx.lineTo(x, y);
+      }
+      ctx.lineTo(...pt(b));
+    };
+
+    ctx.clearRect(0, 0, w, h);
+    ctx.strokeStyle = colour;
+    ctx.globalAlpha = 0.08; ctx.lineWidth = 1;
+    ctx.strokeRect(m, m, W, H);
+
+    // One thick, glowing beam travelling clockwise; it wraps round the corners as it goes.
+    const bright = 0.8 + Math.min(0.2, energy * 0.25);
+    const head = pos * P;
+    const tail = P * (0.2 + 0.06 * Math.min(1, energy));
+    const N = Math.min(140, Math.max(40, Math.round(tail / 7)));   // ~7px steps so the fade is smooth
+    ctx.globalCompositeOperation = 'lighter';
+    ctx.lineCap = 'butt'; ctx.lineJoin = 'round';      // segments butt together without bright beads
+    // Stacked strokes, widest and faintest first, give a soft glow that fades in from the edge.
+    // The wide faint layers are drawn in coarser steps; nobody can see banding that faint.
+    const pass = (n, layers) => {
+      for (let j = 0; j < n; j++) {
+        const a = head - (tail * (j + 1)) / n, b = head - (tail * j) / n;
+        const fade = Math.pow(1 - j / n, 1.4) * bright;
+        ctx.beginPath(); seg(a, b);
+        for (const [lw, alpha, col] of layers) {
+          ctx.strokeStyle = col; ctx.globalAlpha = fade * alpha; ctx.lineWidth = lw; ctx.stroke();
+        }
+      }
+    };
+    pass(Math.ceil(N / 2), [[96, 0.035, colour], [74, 0.045, colour], [56, 0.065, colour], [40, 0.09, colour]]);
+    pass(N, [[28, 0.16, colour], [18, 0.3, colour], [9, 1, '#fff']]);                // glow + hot white core
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.globalAlpha = 1;
+  }
+  requestAnimationFrame(draw);
+  return { setColour, kick, setFlow };
+})();
+
 // =================== data from the main process ===================
 window.saver.onTrack((d) => {
   const sameSong = track && d.track && track.title === d.track.title && track.artist === d.track.artist;
@@ -307,8 +396,6 @@ function iconSvg(name) {
   return `<svg viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">${inner}</svg>`;
 }
 
-const mmss = (ms) => `${String(Math.floor(ms / 60000)).padStart(2, '0')}:${String(Math.floor(ms / 1000) % 60).padStart(2, '0')}`;
-
 // Groups words into poster rows. Returns { html, pic } where pic = { index } or null.
 function compose(line, idx, lifeMs) {
   const words = line.text.split(/\s+/).filter(Boolean);
@@ -362,7 +449,7 @@ function compose(line, idx, lifeMs) {
   const picHtml = pic ? `<div class="pic"><i class="halo"></i>${iconSvg(pic.icon)}</div>` : '';
   const html =
     `<div class="comp a-${align} d-${deco}${pic ? ' has-pic' : ''}" style="--tilt:${tilt}deg;--life:${Math.round(lifeMs)}ms;--draw:${style.picDraw}s">` +
-      `<div class="block"><div class="tag">${mmss(line.t)} <b>/</b> ${String(idx + 1).padStart(2, '0')}</div>${rowHtml}` +
+      `<div class="block">${rowHtml}` +
       (deco === 'brackets' ? '<i class="br tl"></i><i class="br tr"></i><i class="br bl"></i><i class="br br2"></i>' : '') +
       `</div>${picHtml}</div>`;
   return { html, pic, hero };
@@ -427,6 +514,7 @@ function render() {
 
   const line = lines[i];
   if (!line.text) {                                     // instrumental break: a small equaliser
+    frame.setFlow(0.4);
     setCurrent(`rest${i}:${vibe}`, '<div class="eq"><i></i><i></i><i></i><i></i><i></i></div>');
     return;
   }
@@ -437,6 +525,7 @@ function render() {
     const el = setCurrent(`${i}:${vibe}`, html);
     layoutComposition(el);
     lastLineIdx = i;
+    frame.setFlow(line.text.split(/\s+/).length / Math.max(0.8, (nextT - line.t) / 1000));   // words per second
     // Spread the words across the time this line is on screen (weighted by length).
     const span = Math.min(nextT - line.t, Math.max(900, line.text.length * 75)) * 0.85;
     const els = [...el.querySelectorAll('.w')];
@@ -467,6 +556,7 @@ function render() {
         }
       }
       w.pic?.classList.add('on');
+      frame.kick(w.hero ? 0.9 : 0.3);
     }
     active = w.el;
   }
