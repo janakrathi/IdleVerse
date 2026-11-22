@@ -2,13 +2,24 @@ name: Build installers
 
 # Push a tag like v1.0.0 and this builds the Windows and macOS installers
 # and attaches them to a GitHub Release.
+#
+# Windows code signing (SignPath Foundation, free for open source):
+#   The signing steps run only once these are set in the repo settings
+#   (Settings > Secrets and variables > Actions):
+#     secret   SIGNPATH_API_TOKEN        API token of a SignPath user with "submitter" rights
+#     variable SIGNPATH_ORGANIZATION_ID  your SignPath organization ID
+#     variable SIGNPATH_PROJECT_SLUG     optional, defaults to "IdleVerse"
+#     variable SIGNPATH_POLICY_SLUG      optional, defaults to "release-signing"
+#   Each signing request must then be approved by an approver on signpath.io;
+#   the build waits up to an hour for that. Without the secret, installers are
+#   published unsigned as before.
 on:
   push:
     tags: ['v*']
-  workflow_dispatch:
 
 permissions:
   contents: write
+  actions: read          # lets SignPath fetch the unsigned installer from this workflow run
 
 jobs:
   release:
@@ -37,6 +48,8 @@ jobs:
             target: --mac
             files: dist/*.dmg
     runs-on: ${{ matrix.os }}
+    env:
+      SIGN_WINDOWS: ${{ matrix.os == 'windows-latest' && secrets.SIGNPATH_API_TOKEN != '' }}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -48,6 +61,47 @@ jobs:
         run: npx electron-builder ${{ matrix.target }} --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
+
+      # ---------- Windows signing via SignPath (skipped until it's set up) ----------
+      - name: Find the installer
+        if: env.SIGN_WINDOWS == 'true'
+        id: installer
+        shell: bash
+        run: |
+          file=$(ls dist/IdleVerse-Setup-*.exe)
+          echo "path=$file" >> "$GITHUB_OUTPUT"
+          echo "name=$(basename "$file")" >> "$GITHUB_OUTPUT"
+      - name: Upload unsigned installer for SignPath
+        if: env.SIGN_WINDOWS == 'true'
+        id: upload-unsigned
+        uses: actions/upload-artifact@v7
+        with:
+          path: ${{ steps.installer.outputs.path }}
+          archive: false
+      - name: Sign with SignPath (approve the request on signpath.io)
+        if: env.SIGN_WINDOWS == 'true'
+        uses: signpath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: ${{ vars.SIGNPATH_ORGANIZATION_ID }}
+          project-slug: ${{ vars.SIGNPATH_PROJECT_SLUG || 'IdleVerse' }}
+          signing-policy-slug: ${{ vars.SIGNPATH_POLICY_SLUG || 'release-signing' }}
+          github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
+          skip-decompress: true
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: dist/signed
+      - name: Check the signature and use the signed installer
+        if: env.SIGN_WINDOWS == 'true'
+        shell: pwsh
+        run: |
+          $signed = Get-ChildItem dist/signed -Recurse -Filter *.exe | Select-Object -First 1
+          if (-not $signed) { throw 'SignPath returned no signed installer' }
+          $sig = Get-AuthenticodeSignature $signed.FullName
+          Write-Host "Signature: $($sig.Status) - $($sig.SignerCertificate.Subject)"
+          if ($sig.Status -ne 'Valid') { throw "Installer signature is not valid: $($sig.StatusMessage)" }
+          Copy-Item $signed.FullName "${{ steps.installer.outputs.path }}" -Force
+
       - name: Upload to the release
         shell: bash
         env:

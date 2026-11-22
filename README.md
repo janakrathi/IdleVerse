@@ -19,7 +19,7 @@ turns your display dark to save power, and shows the lyrics live, synced and ani
 [![macOS](https://img.shields.io/badge/macOS-Intel%20%26%20Apple%20Silicon-6cf5a2?style=for-the-badge&logo=apple&logoColor=white&labelColor=0d0d0d)](#-install)
 [![License](https://img.shields.io/badge/license-MIT-ffffff?style=for-the-badge&labelColor=0d0d0d)](LICENSE)
 
-[**Install**](#-install) · [**Features**](#-features) · [**Vibes**](#-six-vibes) · [**Controls**](#-controls) · [**How it works**](#-how-it-works) · [**FAQ**](#-faq)
+[**Install**](#-install) · [**Features**](#-features) · [**Vibes**](#-six-vibes) · [**Controls**](#-controls) · [**How it works**](#-how-it-works) · [**FAQ**](#-faq) · [**Code signing policy**](#-code-signing-policy)
 
 <br>
 
@@ -267,7 +267,7 @@ Only while music is actually playing and the lyrics are on screen. Pause for 2 m
 <details>
 <summary><b>What data does it send anywhere?</b></summary>
 <br>
-Only the song's title, artist, album and length: to LRCLIB to look up lyrics, and to Apple's iTunes Search to look up the genre and cover art. Nothing else, no analytics, no accounts.
+Only the song's title, artist, album and length: to LRCLIB to look up lyrics, and to Apple's iTunes Search to look up the genre and cover art. Nothing else, no analytics, no accounts. You can switch either lookup off from the tray menu → <b>Privacy</b>. Details are in the <a href="PRIVACY.md">privacy policy</a>.
 </details>
 
 <details>
@@ -290,6 +290,23 @@ The guess comes from the genre, the lyric words and how fast they're sung, so it
 - [ ] More animation moods
 
 Ideas and pull requests are very welcome. [Open an issue](https://github.com/janakrathi/IdleVerse/issues).
+
+<br>
+
+## ✦ Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+Windows releases are built from this repository's source by [GitHub Actions](.github/workflows/release.yml) and signed through SignPath only after a maintainer manually approves each release.
+
+| Role | Members |
+|---|---|
+| Committers and reviewers | [@janakrathi](https://github.com/janakrathi) |
+| Approvers | [@janakrathi](https://github.com/janakrathi) |
+
+Pull requests from anyone outside this list are reviewed by a committer before they are merged.
+
+**Privacy:** IdleVerse sends the current song's title, artist, album and length to [LRCLIB](https://lrclib.net) (lyrics) and its title and artist to Apple's iTunes Search API (genre and cover art). It sends nothing else, and both lookups can be switched off in the app. See the full [privacy policy](PRIVACY.md).
 
 <br>
 

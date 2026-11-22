@@ -307,8 +307,10 @@ function render() {
     return;
   }
   if (lyrics.kind === 'none' || lyrics.kind === 'instrumental' || !lines.length) {
-    const msg = lyrics.kind === 'instrumental' ? '♪ instrumental' : 'no lyrics found for this one';
-    setCurrent('nolyrics', card(`<span class="note">${msg}</span>`));
+    const msg = lyrics.kind === 'instrumental' ? '♪ instrumental'
+      : lyrics.kind === 'off' ? 'online lyrics are turned off (tray menu → Privacy)'
+      : 'no lyrics found for this one';
+    setCurrent(`nolyrics:${lyrics.kind}`, card(`<span class="note">${msg}</span>`));
     setText($('prev'), ''); setText($('next'), '');
     return;
   }

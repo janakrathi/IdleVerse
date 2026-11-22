@@ -13,4 +13,4 @@
 - **Mac:** right-click IdleVerse in Applications → **Open** → **Open**. If it says the app "is damaged", run `xattr -cr /Applications/IdleVerse.app` in Terminal once.
 
 Then play something in Spotify or Apple Music and click the ♪ icon in your tray / menu bar.
-Full guide: [README](https://github.com/janakrathi/IdleVerse#-install)
+Full guide: [README](https://github.com/janakrathi/IdleVerse#-install) · [Code signing policy](https://github.com/janakrathi/IdleVerse#-code-signing-policy) · [Privacy policy](https://github.com/janakrathi/IdleVerse/blob/main/PRIVACY.md)

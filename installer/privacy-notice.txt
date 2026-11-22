@@ -1,0 +1,23 @@
+IdleVerse - Privacy notice
+
+IdleVerse has no accounts, no analytics, no ads and no tracking.
+
+To show lyrics, colours and the right design for the song that's playing, it looks up the
+CURRENT SONG'S DETAILS online:
+
+  * Lyrics: song title, artist, album and length are sent to LRCLIB (lrclib.net).
+  * Genre and cover art: song title and artist are sent to Apple's iTunes Search API
+    (itunes.apple.com).
+
+Like any web request, these services also see your IP address. Nothing else is sent.
+
+You can turn either lookup off at any time: right-click the IdleVerse icon in the
+system tray > Privacy.
+
+On your computer, IdleVerse keeps only its settings and a temporary cache of album
+covers. It reads what's playing from Windows' media controls.
+
+Full privacy policy:
+https://github.com/janakrathi/IdleVerse/blob/main/PRIVACY.md
+
+You can uninstall IdleVerse at any time from Settings > Apps.

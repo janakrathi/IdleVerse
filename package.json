@@ -1,7 +1,7 @@
 {
   "name": "idleverse",
   "productName": "IdleVerse",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Step away from your desk and your screen becomes a dark, power-saving lyrics show for whatever is playing in Spotify or Apple Music.",
   "author": "janakrathi",
   "homepage": "https://github.com/janakrathi/IdleVerse",
@@ -40,7 +40,8 @@
       "shortcutName": "IdleVerse",
       "installerIcon": "assets/icon.ico",
       "uninstallerIcon": "assets/icon.ico",
-      "uninstallDisplayName": "IdleVerse"
+      "uninstallDisplayName": "IdleVerse",
+      "license": "installer/privacy-notice.txt"
     },
     "mac": {
       "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],

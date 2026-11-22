@@ -1,4 +1,4 @@
-﻿const { app, BrowserWindow, Tray, Menu, ipcMain, powerMonitor, powerSaveBlocker, screen, nativeImage } = require('electron');
+﻿const { app, BrowserWindow, Tray, Menu, ipcMain, powerMonitor, powerSaveBlocker, screen, nativeImage, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { NowPlaying } = require('./detectors');
@@ -20,7 +20,11 @@ const DEFAULTS = {
   keepAwake: true,        // stop the display sleeping while lyrics are on screen
   stopAfterPauseMin: 2,   // music paused this long -> close and let the screen sleep normally
   onlyMusicApps: true,    // ignore YouTube tabs etc.
-  offsetMs: 0
+  offsetMs: 0,
+  // Privacy: the only data that leaves the computer is the current song's details,
+  // sent to these two lookups. Both can be switched off in the tray menu (see PRIVACY.md).
+  onlineLyrics: true,     // song title/artist/album/length -> LRCLIB, for lyrics
+  onlineMeta: true        // song title/artist -> Apple iTunes Search, for genre + cover art
 };
 let settings = { ...DEFAULTS };
 try { settings = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(settingsFile(), 'utf8')) }; } catch {}
@@ -56,10 +60,10 @@ function updateAppArt(t) {
   song.artSrc = src;
   const key = song.key;
   if (!src) return;
-  if (t.artPath) {
+  if (t.artPath) {                       // Windows: a local file, no network
     song.appArt = readArtFile(t.artPath);
     sendTrack();
-  } else {
+  } else if (settings.onlineMeta) {      // Mac Spotify: download the cover from the URL Spotify gives
     fetchArt(t.artUrl).then((a) => { if (song?.key === key && song.artSrc === src) { song.appArt = a; sendTrack(); } });
   }
 }
@@ -83,15 +87,21 @@ function loadSong(t) {
     refresh();
     return;
   }
-  fetchLyrics(t)
-    .then((l) => { if (current()) song.lyrics = l; })
-    .catch(() => { if (current()) song.lyrics = { kind: 'none' }; })
-    .finally(refresh);
-  getMeta(t)
-    .then((m) => { if (current()) { song.genre = m.genre; song.itunesArt = m.art; } })
-    .catch(() => {})
-    .finally(refresh);
-  sendTrack();
+  if (settings.onlineLyrics) {
+    fetchLyrics(t)
+      .then((l) => { if (current()) song.lyrics = l; })
+      .catch(() => { if (current()) song.lyrics = { kind: 'none' }; })
+      .finally(refresh);
+  } else {
+    song.lyrics = { kind: 'off' };
+  }
+  if (settings.onlineMeta) {
+    getMeta(t)
+      .then((m) => { if (current()) { song.genre = m.genre; song.itunesArt = m.art; } })
+      .catch(() => {})
+      .finally(refresh);
+  }
+  refresh();
 }
 
 function onUpdate(t) {
@@ -211,6 +221,13 @@ function updateTrayTooltip() {
   tray.setToolTip(track ? `IdleVerse — ${track.title} · ${track.artist}` : 'IdleVerse — nothing playing');
 }
 
+// Turning a lookup on/off reloads the current song so the change shows straight away.
+function setOnline(key, on) {
+  settings[key] = on;
+  save();
+  if (track && !track.demo) { song = null; onUpdate(track); }
+}
+
 function buildMenu() {
   const radio = (label, key, value) => ({
     label, type: 'radio', checked: settings[key] === value,
@@ -245,6 +262,14 @@ function buildMenu() {
       click: (i) => { settings.onlyMusicApps = detector.onlyMusicApps = i.checked; save(); } },
     { label: 'Open at login', type: 'checkbox', checked: app.getLoginItemSettings().openAtLogin,
       click: (i) => app.setLoginItemSettings({ openAtLogin: i.checked }) },
+    { label: 'Privacy', submenu: [
+      { label: 'Look up lyrics online (LRCLIB)', type: 'checkbox', checked: settings.onlineLyrics,
+        click: (i) => setOnline('onlineLyrics', i.checked) },
+      { label: 'Look up genre && cover art online (Apple iTunes)', type: 'checkbox', checked: settings.onlineMeta,
+        click: (i) => setOnline('onlineMeta', i.checked) },
+      { type: 'separator' },
+      { label: 'Privacy policy…', click: () => shell.openExternal('https://github.com/janakrathi/IdleVerse/blob/main/PRIVACY.md') }
+    ] },
     { type: 'separator' },
     { label: 'Quit IdleVerse', click: () => app.quit() }
   ]));
