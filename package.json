@@ -1,11 +1,14 @@
 {
   "name": "idleverse",
   "productName": "IdleVerse",
-  "version": "1.2.1",
+  "version": "1.3.0",
   "description": "Step away from your desk and your screen becomes a dark, power-saving lyrics show for whatever is playing in Spotify or Apple Music.",
   "author": "janakrathi",
   "homepage": "https://github.com/janakrathi/IdleVerse",
-  "repository": { "type": "git", "url": "https://github.com/janakrathi/IdleVerse.git" },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/janakrathi/IdleVerse.git"
+  },
   "main": "src/main.js",
   "scripts": {
     "start": "electron .",
@@ -22,12 +25,39 @@
     "appId": "com.janakrathi.idleverse",
     "productName": "IdleVerse",
     "afterPack": "scripts/adhoc-sign.js",
-    "files": ["src/**/*", "assets/icon.png", "assets/icon.ico", "assets/trayTemplate.png", "assets/trayTemplate@2x.png"],
-    "asarUnpack": ["assets/**"],
-    "extraResources": [{ "from": "src/detectors/win-nowplaying.ps1", "to": "win-nowplaying.ps1" }],
-    "publish": [{ "provider": "github", "owner": "janakrathi", "repo": "IdleVerse", "releaseType": "release" }],
+    "files": [
+      "src/**/*",
+      "assets/icon.png",
+      "assets/icon.ico",
+      "assets/trayTemplate.png",
+      "assets/trayTemplate@2x.png"
+    ],
+    "asarUnpack": [
+      "assets/**"
+    ],
+    "extraResources": [
+      {
+        "from": "src/detectors/win-nowplaying.ps1",
+        "to": "win-nowplaying.ps1"
+      }
+    ],
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "janakrathi",
+        "repo": "IdleVerse",
+        "releaseType": "release"
+      }
+    ],
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "assets/icon.ico",
       "artifactName": "IdleVerse-Setup-${version}.${ext}"
     },
@@ -44,7 +74,15 @@
       "license": "installer/privacy-notice.txt"
     },
     "mac": {
-      "target": [{ "target": "dmg", "arch": ["arm64", "x64"] }],
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
       "icon": "assets/icon.png",
       "category": "public.app-category.music",
       "artifactName": "IdleVerse-${version}-mac-${arch}.${ext}",

@@ -10,7 +10,8 @@
 
 **Step away from your desk and your screen becomes a lyric show.**<br>
 IdleVerse detects whatever's playing in Spotify or Apple Music, reads the song's vibe and album colours,
-turns your display dark to save power, and shows the lyrics live, synced and animated word by word.
+turns your display dark to save power, and plays the lyrics like a motion-graphics lyric video: bold kinetic type, synced word by word,
+with little line-art pictures that draw themselves in when the words mention them.
 
 <br>
 
@@ -51,8 +52,22 @@ Lyrics are time-synced, and each word appears as it's sung. If the timing is a l
 <tr>
 <td valign="top">
 
+**🎬 &nbsp;Kinetic typography**<br>
+Every line is laid out like a little poster: the key word goes big, small words sit in spaced-out type, and words rise, wipe and slide in with underlines, highlight bars, circles and brackets animating around them.
+
+</td>
+<td valign="top">
+
+**✏️ &nbsp;Pictures from the lyrics**<br>
+Sing about a heart, the moon, fire, rain, a car or money and a matching line-art picture draws itself on screen. 60 pictures, around 400 words, including Hindi and Punjabi (<i>dil, chand, raat, gaddi</i>…).
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
 **🎭 &nbsp;Reads the song's vibe**<br>
-Sad ballad, rock anthem, hip-hop banger, dance track? IdleVerse works it out from the genre, the lyrics and how fast the words come, then picks a design to match.
+Sad ballad, rock anthem, hip-hop banger, dance track? IdleVerse works it out from the genre, the lyrics and how fast the words come, then picks the typeface, motion and pace to match.
 
 </td>
 <td valign="top">
@@ -102,16 +117,16 @@ Every song gets the design that fits it, and the backlight, glow and accents are
 
 <table>
 <tr>
-<td width="50%"><img src="assets/readme/vibe-sad.jpg" alt="Sad vibe"><p align="center"><b>😢 Sad</b> · italic serif, words fade in out of the blur, slow rain</p></td>
-<td width="50%"><img src="assets/readme/vibe-happy.jpg" alt="Happy vibe"><p align="center"><b>😄 Happy</b> · bouncy, colourful words with confetti on every line</p></td>
+<td width="50%"><img src="assets/readme/vibe-sad.jpg" alt="Sad vibe"><p align="center"><b>😢 Sad</b> · slow serif italics that focus in out of a blur, soft rain</p></td>
+<td width="50%"><img src="assets/readme/vibe-happy.jpg" alt="Happy vibe"><p align="center"><b>😄 Happy</b> · bold rounded type with a gradient hero word and drifting shapes</p></td>
 </tr>
 <tr>
-<td><img src="assets/readme/vibe-intense.jpg" alt="Intense vibe"><p align="center"><b>🤘 Intense</b> · heavy capitals slam in and the screen shakes, rising embers</p></td>
-<td><img src="assets/readme/vibe-hype.jpg" alt="Hype vibe"><p align="center"><b>🔥 Hype</b> · left-aligned captions, the current word boxed in colour</p></td>
+<td><img src="assets/readme/vibe-intense.jpg" alt="Intense vibe"><p align="center"><b>🤘 Intense</b> · condensed capitals that hit with a shake and a slash of colour</p></td>
+<td><img src="assets/readme/vibe-hype.jpg" alt="Hype vibe"><p align="center"><b>🔥 Hype</b> · tilted heavy captions with the key word stamped in a box</p></td>
 </tr>
 <tr>
-<td><img src="assets/readme/vibe-dreamy.jpg" alt="Dreamy vibe"><p align="center"><b>☁️ Dreamy</b> · light lowercase floating at different heights, soft glowing orbs</p></td>
-<td><img src="assets/readme/vibe-electric.jpg" alt="Electric vibe"><p align="center"><b>⚡ Electric</b> · neon tubes flicker on and the background pulses on the beat</p></td>
+<td><img src="assets/readme/vibe-dreamy.jpg" alt="Dreamy vibe"><p align="center"><b>☁️ Dreamy</b> · thin lowercase that floats in slowly, soft glowing orbs</p></td>
+<td><img src="assets/readme/vibe-electric.jpg" alt="Electric vibe"><p align="center"><b>⚡ Electric</b> · neon italics with a glowing underline and a pulsing background</p></td>
 </tr>
 </table>
 
@@ -222,7 +237,7 @@ flowchart LR
     E --> H["🏷️ iTunes Search<br/>genre (+ cover fallback)"]
     F --> V{"🎭 Vibe<br/>genre + lyric mood<br/>+ words per second"}
     H --> V
-    V --> G["✨ Lyric show<br/>design per vibe,<br/>colours from the cover"]
+    V --> G["✨ Lyric show<br/>kinetic type per vibe,<br/>pictures from the words,<br/>colours from the cover"]
 ```
 
 | Piece | Where it lives |
@@ -232,9 +247,10 @@ flowchart LR
 | Lyric lookup and LRC parsing | [`src/lyrics.js`](src/lyrics.js) |
 | Genre and album-art lookup | [`src/meta.js`](src/meta.js) |
 | Vibe detection | [`src/vibe.js`](src/vibe.js) |
-| The six designs, album colours, controls | [`src/renderer/`](src/renderer) |
+| Kinetic type, the six designs, album colours, controls | [`src/renderer/saver.js`](src/renderer/saver.js), [`style.css`](src/renderer/style.css) |
+| Lyric word → picture matching | [`src/renderer/pictures.js`](src/renderer/pictures.js) |
 
-Built with [Electron](https://www.electronjs.org). Lyrics are provided by [LRCLIB](https://lrclib.net), a free, open lyrics database; genres by the iTunes Search API.
+Built with [Electron](https://www.electronjs.org). Lyrics are provided by [LRCLIB](https://lrclib.net), a free, open lyrics database; genres by the iTunes Search API. Line-art pictures are from [Lucide](https://lucide.dev) (ISC License).
 
 <br>
 
@@ -255,7 +271,7 @@ Not yet. It reads the music app on the same computer. Phone or speaker playback 
 <details>
 <summary><b>Some songs say "no lyrics found"</b></summary>
 <br>
-LRCLIB has a huge catalogue, but it doesn't cover everything, especially very new or niche tracks. You still get the song title with animated notes.
+LRCLIB has a huge catalogue, but it doesn't cover everything, especially very new or niche tracks. You still get the song title and a small animated equaliser.
 </details>
 
 <details>
@@ -283,6 +299,7 @@ The guess comes from the genre, the lyric words and how fast they're sung, so it
 - [x] Album-art colour palettes
 - [x] Vibe-matched lyric designs
 - [x] Playback controls on the lyric screen
+- [x] Motion-graphics lyrics with pictures that match the words
 - [ ] Spotify Connect support (lyrics for music playing on your phone or speakers)
 - [ ] Real audio analysis (tempo / energy) for even better vibe matching
 - [ ] Multi-monitor mode
