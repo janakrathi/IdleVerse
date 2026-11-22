@@ -221,6 +221,8 @@ function buildMenu() {
     { label: 'Play the demo song', click: startDemo },
     { type: 'separator' },
     { label: 'Start automatically when idle', submenu: [
+      radio('After 10 seconds', 'idleSeconds', 10),
+      radio('After 15 seconds', 'idleSeconds', 15),
       radio('After 30 seconds', 'idleSeconds', 30),
       radio('After 1 minute', 'idleSeconds', 60),
       radio('After 2 minutes', 'idleSeconds', 120),
