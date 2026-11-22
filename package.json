@@ -1,7 +1,7 @@
 {
   "name": "idleverse",
   "productName": "IdleVerse",
-  "version": "1.3.2",
+  "version": "1.4.0",
   "description": "Step away from your desk and your screen becomes a dark, power-saving lyrics show for whatever is playing in Spotify or Apple Music.",
   "author": "janakrathi",
   "homepage": "https://github.com/janakrathi/IdleVerse",
@@ -93,5 +93,8 @@
         "LSUIElement": true
       }
     }
+  },
+  "dependencies": {
+    "electron-updater": "^6.8.11"
   }
 }

@@ -43,7 +43,8 @@ jobs:
         include:
           - os: windows-latest
             target: --win
-            files: dist/*.exe
+            # latest.yml + .blockmap let installed copies update themselves (electron-updater)
+            files: dist/*.exe dist/*.exe.blockmap dist/latest.yml
           - os: macos-latest
             target: --mac
             files: dist/*.dmg
@@ -101,9 +102,21 @@ jobs:
           Write-Host "Signature: $($sig.Status) - $($sig.SignerCertificate.Subject)"
           if ($sig.Status -ne 'Valid') { throw "Installer signature is not valid: $($sig.StatusMessage)" }
           Copy-Item $signed.FullName "${{ steps.installer.outputs.path }}" -Force
+          # Signing changed the file, so the auto-update manifest needs the new checksum and size.
+          # The old blockmap no longer matches either; without it, updaters download the whole file.
+          $exe = Get-Item "${{ steps.installer.outputs.path }}"
+          $sha = [Convert]::ToBase64String([Security.Cryptography.SHA512]::Create().ComputeHash([IO.File]::ReadAllBytes($exe.FullName)))
+          (Get-Content dist/latest.yml) -replace '^(\s*sha512:).*', "`$1 $sha" -replace '^(\s*size:).*', "`$1 $($exe.Length)" |
+            Set-Content dist/latest.yml -Encoding utf8NoBOM
+          Remove-Item dist/*.blockmap -ErrorAction SilentlyContinue
+          Get-Content dist/latest.yml
 
       - name: Upload to the release
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release upload "$GITHUB_REF_NAME" ${{ matrix.files }} --clobber
+        run: |
+          shopt -s nullglob
+          files=(${{ matrix.files }})
+          ls -l "${files[@]}"
+          gh release upload "$GITHUB_REF_NAME" "${files[@]}" --clobber

@@ -6,6 +6,7 @@ const { fetchLyrics } = require('./lyrics');
 const { getMeta, readArtFile, fetchArt } = require('./meta');
 const { detectVibe } = require('./vibe');
 const { DEMO_TRACK, DEMO_LYRICS } = require('./demo');
+const { createUpdater, announceIfUpdated } = require('./updater');
 
 const SNAP = process.argv.find((a) => a.startsWith('--snap='));   // dev: screenshot mode
 const arg = (k, d) => (process.argv.find((a) => a.startsWith(`--${k}=`)) || '').split('=')[1] || d;
@@ -24,7 +25,8 @@ const DEFAULTS = {
   // Privacy: the only data that leaves the computer is the current song's details,
   // sent to these two lookups. Both can be switched off in the tray menu (see PRIVACY.md).
   onlineLyrics: true,     // song title/artist/album/length -> LRCLIB, for lyrics
-  onlineMeta: true        // song title/artist -> Apple iTunes Search, for genre + cover art
+  onlineMeta: true,       // song title/artist -> Apple iTunes Search, for genre + cover art
+  autoUpdate: true        // check GitHub for new versions (Windows installs them by itself)
 };
 let settings = { ...DEFAULTS };
 try { settings = { ...DEFAULTS, ...JSON.parse(fs.readFileSync(settingsFile(), 'utf8')) }; } catch {}
@@ -35,7 +37,7 @@ if (!settings.v) { if (settings.idleSeconds === 60) settings.idleSeconds = 15; s
 const save = () => { if (SNAP) return; try { fs.writeFileSync(settingsFile(), JSON.stringify(settings, null, 2)); } catch {} };
 
 // ---------- state ----------
-let tray, win, detector, blockerId = null;
+let tray, win, detector, updater, blockerId = null;
 let track = null;             // current track info from the detector
 // song: { key, lyrics, genre, vibe, appArt (cover from the music app), itunesArt (fallback), artSrc }
 let song = null;
@@ -236,7 +238,17 @@ function buildMenu() {
     label, type: 'radio', checked: settings[key] === value,
     click: () => { settings[key] = value; save(); sendTrack(); }
   });
+  // Top of the menu: an update that's ready to install (Windows) or to download (Mac).
+  const up = updater?.state || {};
+  const updateItems =
+    up.status === 'ready' ? [{ label: `Restart to update to ${up.version}`, click: () => updater.installNow() }, { type: 'separator' }]
+    : up.status === 'available' ? [{ label: `Download IdleVerse ${up.version}…`, click: () => updater.openDownloadPage() }, { type: 'separator' }]
+    : [];
+  const checkLabel = up.status === 'checking' ? 'Checking for updates…'
+    : up.status === 'downloading' ? `Downloading update ${up.version}…`
+    : `Check for updates (you have ${app.getVersion()})`;
   tray.setContextMenu(Menu.buildFromTemplate([
+    ...updateItems,
     { label: 'Show lyrics now', click: () => showSaver(true) },
     { label: 'Play the demo song', click: startDemo },
     { type: 'separator' },
@@ -270,10 +282,13 @@ function buildMenu() {
         click: (i) => setOnline('onlineLyrics', i.checked) },
       { label: 'Look up genre && cover art online (Apple iTunes)', type: 'checkbox', checked: settings.onlineMeta,
         click: (i) => setOnline('onlineMeta', i.checked) },
+      { label: 'Check for updates automatically (GitHub)', type: 'checkbox', checked: settings.autoUpdate,
+        click: (i) => { settings.autoUpdate = i.checked; save(); updater?.setEnabled(i.checked); } },
       { type: 'separator' },
       { label: 'Privacy policy…', click: () => shell.openExternal('https://github.com/janakrathi/IdleVerse/blob/main/PRIVACY.md') }
     ] },
     { type: 'separator' },
+    { label: checkLabel, enabled: !['checking', 'downloading'].includes(up.status), click: () => updater?.check(true) },
     { label: 'Quit IdleVerse', click: () => app.quit() }
   ]));
 }
@@ -298,6 +313,18 @@ function trayIcon() {
 app.whenReady().then(() => {
   tray = new Tray(trayIcon());
   tray.on('click', () => showSaver(true));
+  // Start with the computer by default (Windows "Startup apps" / Mac "Login Items"). Done once,
+  // so if someone unticks "Open at login" in the tray menu it stays off.
+  if (app.isPackaged && !SNAP && !settings.loginDefaultApplied) {
+    app.setLoginItemSettings({ openAtLogin: true });
+    settings.loginDefaultApplied = true;
+    save();
+  }
+  if (!SNAP) {
+    updater = createUpdater({ isBusy: () => !!(win && !win.isDestroyed()), onChange: () => buildMenu() });
+    updater.setEnabled(settings.autoUpdate);
+    announceIfUpdated(settings, save);
+  }
   buildMenu();
   updateTrayTooltip();
 

@@ -9,9 +9,12 @@ CURRENT SONG'S DETAILS online:
   * Genre and cover art: song title and artist are sent to Apple's iTunes Search API
     (itunes.apple.com).
 
+It also checks GitHub (github.com) about every 6 hours for a newer version of
+IdleVerse, and installs it if there is one. Only the app's version number is sent.
+
 Like any web request, these services also see your IP address. Nothing else is sent.
 
-You can turn either lookup off at any time: right-click the IdleVerse icon in the
+You can turn any of these off at any time: right-click the IdleVerse icon in the
 system tray > Privacy.
 
 On your computer, IdleVerse keeps only its settings and a temporary cache of album

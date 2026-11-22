@@ -13,10 +13,12 @@ To show lyrics, colours and the right design for the song that's playing, IdleVe
 | Lyrics | Song title, artist, album and length | [LRCLIB](https://lrclib.net) (`lrclib.net`) | To get the song's time-synced lyrics |
 | Genre and cover art | Song title and artist | Apple's [iTunes Search API](https://performance-partners.apple.com/search-api) (`itunes.apple.com`) | To learn the genre (for the design) and get the album cover if the music app didn't provide one |
 | Cover art on Mac | Nothing beyond the request itself | Spotify's image server, using the cover address Spotify gives | To show the album cover for songs playing in Spotify on a Mac |
+| Update check | IdleVerse's version number (no song details) | [GitHub](https://github.com) (`github.com`, `api.github.com`) | To find out whether a newer version has been released, about every 6 hours. On Windows the new version is then downloaded from GitHub and installed |
 
 Like any web request, these services also see your IP address. They are run by others and have
 their own policies: [Apple privacy policy](https://www.apple.com/legal/privacy/), [LRCLIB](https://lrclib.net),
-[Spotify privacy policy](https://www.spotify.com/legal/privacy-policy/).
+[Spotify privacy policy](https://www.spotify.com/legal/privacy-policy/),
+[GitHub privacy statement](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement).
 
 Nothing else is sent: no account details, no listening history, no information about your
 computer, files or other apps.
@@ -27,6 +29,7 @@ Right-click the IdleVerse icon in the system tray (Windows) or menu bar (Mac) â†
 
 - **Look up lyrics online (LRCLIB)**: untick to stop lyric lookups. The lyric screen then shows only the song title and cover.
 - **Look up genre & cover art online (Apple iTunes)**: untick to stop genre and cover lookups. Colours then come only from the cover your music app provides (on Windows that comes straight from the app, with no network request).
+- **Check for updates automatically (GitHub)**: untick to stop the update checks. You can still check by hand with **Check for updates** in the same menu.
 
 ## What stays on your computer
 

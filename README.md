@@ -159,7 +159,7 @@ Every song gets the design that fits it, and the backlight, glow and accents are
 2. Open it. If Windows shows **"Windows protected your PC"**, click **More info → Run anyway**. This appears because the app isn't code-signed yet.
 3. Finish the installer. IdleVerse launches and its round purple icon appears in your system tray (look under the **^** arrow next to the clock).
 4. Play something in **Spotify** or **Apple Music**, then click the tray icon to see it in action.
-5. Next time, just press the **Windows key** and type **IdleVerse**, or use the desktop shortcut. To have it start by itself, right-click the tray icon and tick **Open at login**.
+5. IdleVerse now starts by itself every time you turn on your PC (it's listed under **Settings → Apps → Startup**). To open it by hand, press the **Windows key** and type **IdleVerse**, or use the desktop shortcut. Don't want it at startup? Right-click the tray icon and untick **Open at login**.
 
 </details>
 
@@ -177,7 +177,7 @@ Every song gets the design that fits it, and the backlight, glow and accents are
    ```bash
    xattr -cr /Applications/IdleVerse.app
    ```
-4. The IdleVerse icon appears in your menu bar. When asked, **allow IdleVerse to control Spotify / Music**; that's how it reads the current song. Next time, open it with **Spotlight** (⌘ Space, type *IdleVerse*).
+4. The IdleVerse icon appears in your menu bar. When asked, **allow IdleVerse to control Spotify / Music**; that's how it reads the current song. It opens by itself when you log in (untick **Open at login** in its menu to stop that); to open it by hand, use **Spotlight** (⌘ Space, type *IdleVerse*).
 
 </details>
 
@@ -283,7 +283,13 @@ Only while music is actually playing and the lyrics are on screen. Pause for 2 m
 <details>
 <summary><b>What data does it send anywhere?</b></summary>
 <br>
-Only the song's title, artist, album and length: to LRCLIB to look up lyrics, and to Apple's iTunes Search to look up the genre and cover art. Nothing else, no analytics, no accounts. You can switch either lookup off from the tray menu → <b>Privacy</b>. Details are in the <a href="PRIVACY.md">privacy policy</a>.
+Only the song's title, artist, album and length: to LRCLIB to look up lyrics, and to Apple's iTunes Search to look up the genre and cover art. It also asks GitHub every few hours whether there's a newer version. Nothing else, no analytics, no accounts. You can switch any of these off from the tray menu → <b>Privacy</b>. Details are in the <a href="PRIVACY.md">privacy policy</a>.
+</details>
+
+<details>
+<summary><b>How do I get new versions?</b></summary>
+<br>
+<b>Windows:</b> automatically. IdleVerse checks for a new version every few hours, downloads it in the background and installs it while the lyrics aren't on screen; you'll get a small "IdleVerse updated" notification. <b>Mac:</b> you get a notification when a new version is out; click it to download. (Self-updating on Mac needs an Apple-signed app, which is on the roadmap.) Either way, the tray menu has <b>Check for updates</b>. Versions before 1.4 can't update themselves, so download 1.4 or newer once.
 </details>
 
 <details>
@@ -323,7 +329,7 @@ Windows releases are built from this repository's source by [GitHub Actions](.gi
 
 Pull requests from anyone outside this list are reviewed by a committer before they are merged.
 
-**Privacy:** IdleVerse sends the current song's title, artist, album and length to [LRCLIB](https://lrclib.net) (lyrics) and its title and artist to Apple's iTunes Search API (genre and cover art). It sends nothing else, and both lookups can be switched off in the app. See the full [privacy policy](PRIVACY.md).
+**Privacy:** IdleVerse sends the current song's title, artist, album and length to [LRCLIB](https://lrclib.net) (lyrics), its title and artist to Apple's iTunes Search API (genre and cover art), and checks [GitHub](https://github.com) for new versions. It sends nothing else, and all three can be switched off in the app. See the full [privacy policy](PRIVACY.md).
 
 <br>
 

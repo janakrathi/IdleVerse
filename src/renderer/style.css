@@ -120,7 +120,11 @@ body {
 .row .w.on { opacity: 1; transform: none; filter: none; clip-path: inset(-40% -40% -40% -40%); }
 /* New words wait a beat so the previous line's exit clears first. */
 .line:not(.leaving) .w { transition-delay: .12s; }
-.vibe-sad .line:not(.leaving) .w { transition-delay: .4s; }
+.vibe-sad .line:not(.leaving) .w { transition-delay: .45s; }
+.vibe-dreamy .line:not(.leaving) .w { transition-delay: .35s; }
+/* Accent shapes wait for their word to start appearing, so they never draw under empty space. */
+.vibe-sad .line:not(.leaving) :is(.deco, .echo, .ring ellipse) { transition-delay: .6s; }
+.vibe-dreamy .line:not(.leaving) :is(.deco, .echo, .ring ellipse) { transition-delay: .5s; }
 .m-rise .txt, .m-drop .txt { clip-path: inset(-.1em -30% -.12em -30%); }   /* mask: words appear out of the row's edge */
 .m-rise  .w { transform: translateY(105%); opacity: 1; }
 .m-drop  .w { transform: translateY(-105%); opacity: 1; }
@@ -193,13 +197,13 @@ body {
 .line.leaving { animation: cutOut .3s cubic-bezier(.5, 0, .75, 0) forwards; pointer-events: none; }
 @keyframes cutOut { to { opacity: 0; transform: translateY(-4vh) scale(1.04); } }
 .vibe-sad .line.leaving { animation: sadOut 1.4s ease-out forwards; }
-@keyframes sadOut { 35% { opacity: 0; } to { opacity: 0; transform: translateY(-6vh); filter: blur(10px); } }
+@keyframes sadOut { 25% { opacity: 0; } to { opacity: 0; transform: translateY(-6vh); filter: blur(10px); } }
 .vibe-intense .line.leaving { animation: punchOut .22s ease-in forwards; }
 @keyframes punchOut { to { opacity: 0; transform: scale(1.25); } }
 .vibe-hype .line.leaving, .vibe-electric .line.leaving { animation: whipOut .22s cubic-bezier(.6, 0, .8, .2) forwards; }
 @keyframes whipOut { to { opacity: 0; transform: translateX(-14vw) skewX(-8deg); } }
 .vibe-dreamy .line.leaving { animation: dreamOut .8s ease forwards; }
-@keyframes dreamOut { to { opacity: 0; transform: scale(.96); } }
+@keyframes dreamOut { 40% { opacity: 0; } to { opacity: 0; transform: scale(.96); } }
 
 /* ---- instrumental breaks: a small equaliser ---- */
 .eq { display: flex; align-items: flex-end; gap: 1vh; height: 9vh; }
